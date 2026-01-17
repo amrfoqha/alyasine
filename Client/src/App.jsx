@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import { Routes, Route } from "react-router-dom";
@@ -6,7 +6,7 @@ import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./context/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
-
+import ProductsPage from "./pages/ProductsPage";
 // import ProfilePage from "./pages/ProfilePage";
 // import SettingsPage from "./pages/SettingsPage";
 function App() {
@@ -25,6 +25,8 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="inventory" element={<InventoryPage />} />
+          <Route path="product/:id" element={<ProductsPage />} />
+
           {/* <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} /> */}
         </Route>

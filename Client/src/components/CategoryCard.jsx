@@ -1,7 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
-
+import { useNavigate } from "react-router-dom";
 const CategoryCard = ({ product }) => {
+  const navigate = useNavigate();
   // Safety check to prevent crashes
   if (!product) return null;
 
@@ -15,6 +16,10 @@ const CategoryCard = ({ product }) => {
     }
   );
 
+  const handleClick = () => {
+    navigate(`/product/${product._id}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -22,6 +27,7 @@ const CategoryCard = ({ product }) => {
       transition={{ duration: 0.4 }}
       whileHover={{ scale: 1.05 }}
       className="flex flex-col justify-between bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={handleClick}
     >
       <div className="w-full">
         <div>

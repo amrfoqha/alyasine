@@ -3,8 +3,16 @@ const ProductCategory = require("../models/productCategories.model");
 
 module.exports.createProduct = async (req, res) => {
   try {
-    const { name, categoryId, price, quantity, attributes } = req.body;
-    const existing = await Product.findOne({ name, categoryId });
+    const {
+      name,
+      category,
+      sellPrice,
+      quantity,
+      unit,
+      description,
+      attributes,
+    } = req.body;
+    const existing = await Product.findOne({ name, category });
     if (existing) {
       return res.status(400).json({
         message: "Product with this name already exists in this category",
@@ -13,9 +21,11 @@ module.exports.createProduct = async (req, res) => {
 
     const product = await Product.create({
       name,
-      categoryId,
-      price,
+      category,
+      sellPrice,
       quantity,
+      unit,
+      description,
       attributes: attributes || {},
     });
 
@@ -59,5 +69,38 @@ module.exports.deleteProduct = async (req, res) => {
   } catch (error) {
     console.error("Delete Product Error:", error);
     res.status(500).json({ message: "Server error while deleting product" });
+  }
+};
+
+module.exports.getAllProductsByCategoryByPage = async (req, res) => {
+  try {
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+    const skip = (page - 1) * limit;
+    const totalItems = await Product.countDocuments({
+      category: req.params.id,
+    });
+    const totalPages = Math.ceil(totalItems / limit);
+
+    const products = await Product.find({
+      category: req.params.id,
+    })
+      .populate("category")
+      .skip(skip)
+      .limit(limit);
+    res.json({
+      products,
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    });
+  } catch (error) {
+    console.error("Get All Products Error:", error);
+    res.status(500).json({ message: "Server error while fetching products" });
   }
 };

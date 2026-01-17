@@ -19,6 +19,10 @@ const stockInSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    costPrice: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: true,
