@@ -24,7 +24,12 @@ const NavButton = ({ navigate, path, label, setCurrentPath, currentPath }) => {
 const SideBarComponent = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [currentPath, setCurrentPath] = useState(location.pathname);
+  const [currentPath, setCurrentPath] = useState(() => {
+    if (location.pathname === "/") {
+      return "/dashboard";
+    }
+    return location.pathname;
+  });
   return (
     <div className="w-42 min-h-screen bg-gray-800 text-white ">
       <div className="flex flex-col justify-between h-full py-5  ">

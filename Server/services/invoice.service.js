@@ -1,28 +1,65 @@
+const mongoose = require("mongoose");
 const Invoice = require("../models/invoices.model");
 const Customer = require("../models/customer.model");
-const Product = require("../models/products.model");
-// invoice.service.js
-module.exports.createInvoice = async (data) => {
-  const { customerId, items, paymentType } = data;
+const StockIn = require("../models/stockIn.model");
 
-  // 1️⃣ احسب المجموع
-  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+exports.createInvoice = async (data) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  // 2️⃣ خصم من المخزون
-  for (let item of items) {
-    const product = await Product.findById(item.productId);
-    product.quantity -= item.quantity;
-    await product.save();
+  try {
+    const { customerId, items, paymentType } = data;
+
+    let total = 0;
+
+    for (const item of items) {
+      total += item.price * item.quantity;
+
+      const stock = await StockIn.aggregate([
+        { $match: { product: new mongoose.Types.ObjectId(item.productId) } },
+        { $group: { _id: null, totalQty: { $sum: "$quantity" } } },
+      ]);
+
+      const availableQty = stock[0]?.totalQty || 0;
+
+      if (availableQty < item.quantity) {
+        throw new Error("Not enough stock");
+      }
+
+      await StockIn.findOneAndUpdate(
+        { product: item.productId },
+        { $inc: { quantity: -item.quantity } },
+        { session }
+      );
+    }
+
+    if (paymentType === "credit") {
+      await Customer.findByIdAndUpdate(
+        customerId,
+        { $inc: { balance: total } },
+        { session }
+      );
+    }
+
+    const invoice = await Invoice.create(
+      [
+        {
+          customer: customerId,
+          items,
+          total,
+          paymentType,
+        },
+      ],
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return invoice[0];
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  // 3️⃣ تحديث رصيد الزبون
-  if (paymentType === "credit") {
-    const customer = await Customer.findById(customerId);
-    customer.balance += total;
-    await customer.save();
-  }
-
-  // 4️⃣ حفظ الفاتورة
-  const invoice = await Invoice.create({ ...data, total });
-  return invoice;
 };
