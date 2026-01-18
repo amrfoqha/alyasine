@@ -7,6 +7,7 @@ import ProtectedRoute from "./context/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
 import ProductsPage from "./pages/ProductsPage";
+import StockInPage from "./pages/StockInPage";
 // import ProfilePage from "./pages/ProfilePage";
 // import SettingsPage from "./pages/SettingsPage";
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="product/:id" element={<ProductsPage />} />
+          <Route path="stockin" element={<StockInPage />} />
 
           {/* <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} /> */}

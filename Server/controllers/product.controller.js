@@ -15,7 +15,8 @@ module.exports.createProduct = async (req, res) => {
     const existing = await Product.findOne({ name, category });
     if (existing) {
       return res.status(400).json({
-        message: "Product with this name already exists in this category",
+        message:
+          "Product with this name already exists in this category\n هذا المنتج موجود بالفعل في هذه الفئة",
       });
     }
 
@@ -28,6 +29,7 @@ module.exports.createProduct = async (req, res) => {
       description,
       attributes: attributes || {},
     });
+    await product.populate("category");
 
     res.status(201).json(product);
   } catch (error) {
@@ -50,7 +52,7 @@ module.exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate(
       "categoryId",
-      "name"
+      "name",
     );
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
@@ -88,6 +90,7 @@ module.exports.getAllProductsByCategoryByPage = async (req, res) => {
       .populate("category")
       .skip(skip)
       .limit(limit);
+    console.log(products);
     res.json({
       products,
       pagination: {
