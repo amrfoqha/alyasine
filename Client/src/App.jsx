@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import LoginPage from "./pages/LoginPage";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, redirect } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./context/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
@@ -9,6 +9,7 @@ import InventoryPage from "./pages/InventoryPage";
 import ProductsPage from "./pages/ProductsPage";
 import StockInPage from "./pages/StockInPage";
 import { Toaster } from "react-hot-toast";
+import NotFoundPage from "./pages/NotFoundPage";
 // import ProfilePage from "./pages/ProfilePage";
 // import SettingsPage from "./pages/SettingsPage";
 function App() {
@@ -33,9 +34,8 @@ function App() {
 
           {/* <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} /> */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
-
-        <Route path="/*" element={<p>404 Not Found</p>} />
       </Routes>
     </>
   );

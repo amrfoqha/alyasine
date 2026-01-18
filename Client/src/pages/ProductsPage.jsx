@@ -24,14 +24,18 @@ const ProductsPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [open, setOpen] = useState(false);
   const limit = 5;
-  console.log(id);
+  const [search, setSearch] = useState("");
   useEffect(() => {
     const fetchProductCategoryById = async () => {
       try {
         const productCategory = await getProductCategoryById(id);
         setProductCategory(productCategory);
-        const res = await getAllProductsByCategoryByPage(id, page, limit);
-        console.log(res);
+        const res = await getAllProductsByCategoryByPage(
+          id,
+          page,
+          limit,
+          search,
+        );
         setProducts(res.products);
         setAllProducts(res.products);
         setPage(res.pagination.page);
@@ -41,18 +45,12 @@ const ProductsPage = () => {
       }
     };
     fetchProductCategoryById();
-  }, [id, page]);
+  }, [id, page, search]);
 
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
-    if (searchValue === "") {
-      setProducts(allProducts);
-      return;
-    }
-    const filteredProducts = allProducts.filter((product) => {
-      return product.name.toLowerCase().includes(searchValue);
-    });
-    setProducts(filteredProducts);
+    setSearch(searchValue);
+    setPage(1);
   };
   return (
     <div className="flex flex-col gap-4  mx-auto  w-full">

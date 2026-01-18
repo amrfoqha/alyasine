@@ -18,6 +18,7 @@ import StockInTable from "../components/StockInTable";
 
 const StockInPage = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
   const [stockIn, setStockIn] = useState([]);
   const [allStockIn, setAllStockIn] = useState([]);
   const [Page, setPage] = useState(1);
@@ -27,8 +28,7 @@ const StockInPage = () => {
   useEffect(() => {
     const fetchStockIn = async () => {
       try {
-        const response = await getStockIn(Page, limit);
-        console.log(response);
+        const response = await getStockIn(Page, limit, search);
         setStockIn(response.stockIn);
         setAllStockIn(response.stockIn);
         setTotalPages(response.pagination.totalPages);
@@ -37,18 +37,12 @@ const StockInPage = () => {
       }
     };
     fetchStockIn();
-  }, [Page, limit]);
+  }, [Page, limit, search]);
 
   const handleSearch = (e) => {
     const searchValue = e.target.value.toLowerCase();
-    if (searchValue === "") {
-      setStockIn(allStockIn);
-      return;
-    }
-    const filteredStockIn = allStockIn.filter((stockIn) => {
-      return stockIn.productId.name.toLowerCase().includes(searchValue);
-    });
-    setStockIn(filteredStockIn);
+    setSearch(searchValue);
+    setPage(1);
   };
 
   return (

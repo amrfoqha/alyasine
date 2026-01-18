@@ -82,17 +82,16 @@ module.exports.getAllProductsByCategoryByPage = async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+    const search = req.query.search || "";
     const skip = (page - 1) * limit;
-    const totalItems = await Product.countDocuments({
-      category: req.params.id,
-      isDeleted: false,
-    });
+    let query = { category: req.params.id, isDeleted: false };
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
+    const totalItems = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
-    const products = await Product.find({
-      category: req.params.id,
-      isDeleted: false,
-    })
+    const products = await Product.find(query)
       .populate("category")
       .skip(skip)
       .limit(limit);
