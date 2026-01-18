@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import InputComponent from "./InputComponent";
 import ButtonComponent from "./ButtonComponent";
 import { createProductCategory } from "../API/ProductCategoryAPI";
+import { toast } from "react-hot-toast";
 const AddCategoryForm = ({ setProducts, products }) => {
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -14,6 +15,7 @@ const AddCategoryForm = ({ setProducts, products }) => {
     try {
       const product = await createProductCategory(name);
       setProducts([...products, product]);
+      toast.success("تم إضافة المنتج بنجاح");
       setName("");
       setNameError("");
     } catch (error) {

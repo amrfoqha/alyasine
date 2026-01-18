@@ -18,6 +18,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import EventIcon from "@mui/icons-material/Event";
 import NoteIcon from "@mui/icons-material/Note";
 import { stockIn } from "../API/StockAPI";
+import { toast } from "react-hot-toast";
 
 const AddStockDialog = ({ open, setOpen, product }) => {
   const getTodayDate = () => new Date().toISOString().split("T")[0];
@@ -77,10 +78,11 @@ const AddStockDialog = ({ open, setOpen, product }) => {
           date: formData.date,
           note: formData.note,
         });
-        setOpen(false);
         toast.success("تم إضافة البضاعة بنجاح");
+        setOpen(false);
       } catch (error) {
         console.log(error);
+        toast.error("حدث خطأ أثناء إضافة البضاعة");
       }
     }
   };

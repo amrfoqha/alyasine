@@ -2,7 +2,7 @@ import BaseAPI from "./BaseAPI";
 
 export const stockIn = async (stockData) => {
   try {
-    const response = await BaseAPI.post("/stock/stockIn", stockData);
+    const response = await BaseAPI.post("/stock/stockin", stockData);
     return response.data;
   } catch (error) {
     throw error.response?.data;
@@ -11,7 +11,29 @@ export const stockIn = async (stockData) => {
 
 export const stockOut = async (stockData) => {
   try {
-    const response = await BaseAPI.post("/stock/stockOut", stockData);
+    const response = await BaseAPI.post("/stock/stockout", stockData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};
+
+export const getStockIn = async (page = 1, limit = 5) => {
+  try {
+    const response = await BaseAPI.get(
+      `/stock/stockin?page=${page}&limit=${limit}`,
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};
+
+export const getStockOut = async (page = 1, limit = 5) => {
+  try {
+    const response = await BaseAPI.get(
+      `/stock/stockout?page=${page}&limit=${limit}`,
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data;

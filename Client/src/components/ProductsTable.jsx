@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import DeleteIcon from "@mui/icons-material/Delete"; // أضف أيقونات لمظهر احترافي
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import AddStockDialog from "./AddStockDialog";
+import { toast } from "react-hot-toast";
 
 const ProductsTable = ({ products, setProducts }) => {
   const handleDelete = async (id) => {
@@ -12,8 +13,10 @@ const ProductsTable = ({ products, setProducts }) => {
       try {
         await deleteProduct(id);
         setProducts(products.filter((product) => product._id !== id));
+        toast.success("تم حذف المنتج بنجاح");
       } catch (error) {
         console.log(error);
+        toast.error("حدث خطأ أثناء حذف المنتج");
       }
     }
   };
@@ -68,13 +71,13 @@ const ProductsTable = ({ products, setProducts }) => {
               <td className="p-4 text-gray-500 max-w-xs truncate">
                 {product.description}
               </td>
-              <td className="p-4">
+              <td className="p-2 ">
                 {Object.entries(product.attributes).length > 0 ? (
                   Object.entries(product.attributes).map(
                     ([key, value], index) => (
                       <span
                         key={index}
-                        className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full ml-1 mb-1"
+                        className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full ml-1 mb-1 w-1/3"
                       >
                         {key}: {value}
                       </span>

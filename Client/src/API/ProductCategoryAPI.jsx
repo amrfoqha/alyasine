@@ -10,9 +10,11 @@ export const createProductCategory = async (name) => {
   }
 };
 
-export const getAllProductCategory = async () => {
+export const getAllProductCategory = async (page = 1, limit = 6) => {
   try {
-    const response = await BaseAPI.get("/categories");
+    const response = await BaseAPI.get(
+      `/categories?page=${page}&limit=${limit}`,
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data;

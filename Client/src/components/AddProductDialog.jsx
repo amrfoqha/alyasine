@@ -11,6 +11,7 @@ import ButtonComponent from "./ButtonComponent";
 import { createProduct } from "../API/ProductAPI";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import Typography from "@mui/material/Typography";
+import { toast } from "react-hot-toast";
 
 const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
   const [name, setName] = useState("");
@@ -107,8 +108,9 @@ const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
       const res = await createProduct(product);
       setProducts((prev) => [...prev, res]);
       setOpen(false);
+      toast.success("تم إضافة المنتج بنجاح");
     } catch (err) {
-      alert(err.message);
+      toast.error("حدث خطأ أثناء إضافة المنتج");
     }
   };
 

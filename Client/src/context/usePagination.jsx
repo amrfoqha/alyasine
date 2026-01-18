@@ -1,6 +1,6 @@
 import Pagination from "@mui/material/Pagination";
 
-const UsePagination = ({ Page, setPage, totalPages }) => {
+const UsePagination = ({ Page, setPage, totalPages, dir = "rtl" }) => {
   return (
     <Pagination
       count={totalPages}
@@ -35,6 +35,7 @@ const UsePagination = ({ Page, setPage, totalPages }) => {
           color: "#fff",
         },
       }}
+      dir={dir}
     />
   );
 };

@@ -40,7 +40,10 @@ module.exports.createProduct = async (req, res) => {
 
 module.exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate("categoryId", "name");
+    const products = await Product.find({ isDeleted: false }).populate(
+      "category",
+      "name",
+    );
     res.json(products);
   } catch (error) {
     console.error("Get All Products Error:", error);
@@ -50,10 +53,9 @@ module.exports.getAllProducts = async (req, res) => {
 
 module.exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate(
-      "categoryId",
-      "name",
-    );
+    const product = await Product.findById(req.params.id, {
+      isDeleted: false,
+    }).populate("category", "name");
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);
   } catch (error) {
@@ -64,7 +66,9 @@ module.exports.getProductById = async (req, res) => {
 
 module.exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndUpdate(req.params.id, {
+      isDeleted: true,
+    });
     if (!product) return res.status(404).json({ message: "Product not found" });
 
     res.json({ message: "Product deleted successfully" });
@@ -81,11 +85,13 @@ module.exports.getAllProductsByCategoryByPage = async (req, res) => {
     const skip = (page - 1) * limit;
     const totalItems = await Product.countDocuments({
       category: req.params.id,
+      isDeleted: false,
     });
     const totalPages = Math.ceil(totalItems / limit);
 
     const products = await Product.find({
       category: req.params.id,
+      isDeleted: false,
     })
       .populate("category")
       .skip(skip)

@@ -31,7 +31,12 @@ const productSchema = new mongoose.Schema(
       type: Map,
       of: String,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
+
   {
     timestamps: true,
   },

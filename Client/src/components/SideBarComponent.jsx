@@ -40,7 +40,7 @@ const SideBarComponent = () => {
           <NavButton
             navigate={navigate}
             path="/dashboard"
-            label="Dashboard"
+            label="لوحة التحكم"
             setCurrentPath={setCurrentPath}
             currentPath={currentPath}
           />
@@ -61,7 +61,7 @@ const SideBarComponent = () => {
           <NavButton
             navigate={navigate}
             path="/settings"
-            label="Settings"
+            label="الإعدادات"
             setCurrentPath={setCurrentPath}
             currentPath={currentPath}
           />

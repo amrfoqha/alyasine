@@ -8,11 +8,13 @@ import DashboardPage from "./pages/DashboardPage";
 import InventoryPage from "./pages/InventoryPage";
 import ProductsPage from "./pages/ProductsPage";
 import StockInPage from "./pages/StockInPage";
+import { Toaster } from "react-hot-toast";
 // import ProfilePage from "./pages/ProfilePage";
 // import SettingsPage from "./pages/SettingsPage";
 function App() {
   return (
     <>
+      <Toaster position="top-center" />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route

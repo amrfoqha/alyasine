@@ -29,7 +29,70 @@ async function stockOut({ productId, quantity }) {
   return product;
 }
 
+async function getAllStockIn(req) {
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+  const skip = (page - 1) * limit;
+  const totalItems = await StockIn.countDocuments();
+  const totalPages = Math.ceil(totalItems / limit);
+  const stockIn = await StockIn.find()
+    .populate({
+      path: "productId",
+      populate: {
+        path: "category",
+        select: "name",
+      },
+    })
+    .skip(skip)
+    .limit(limit);
+
+  if (!stockIn) throw new Error("No stock in found");
+
+  return {
+    stockIn,
+    pagination: {
+      totalItems,
+      total: stockIn.length,
+      page,
+      limit,
+      totalPages,
+    },
+  };
+}
+
+async function getAllStockOut(req) {
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const limit = Math.max(parseInt(req.query.limit) || 5, 1);
+  const skip = (page - 1) * limit;
+  const totalItems = await StockOut.countDocuments();
+  const totalPages = Math.ceil(totalItems / limit);
+  const stockOut = await StockOut.find()
+    .populate({
+      path: "productId",
+      populate: {
+        path: "category",
+        select: "name",
+      },
+    })
+    .skip(skip)
+    .limit(limit);
+  if (!stockOut) throw new Error("No stock out found");
+
+  return {
+    stockOut,
+    pagination: {
+      totalItems,
+      total: stockOut.length,
+      page,
+      limit,
+      totalPages,
+    },
+  };
+}
+
 module.exports = {
   stockIn,
   stockOut,
+  getAllStockIn,
+  getAllStockOut,
 };
