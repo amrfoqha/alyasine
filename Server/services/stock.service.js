@@ -32,31 +32,33 @@ async function stockOut({ productId, quantity }) {
 async function getAllStockIn(req) {
   const page = Math.max(parseInt(req.query.page) || 1, 1);
   const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+  const search = req.query.search || "";
   const skip = (page - 1) * limit;
-  const totalItems = await StockIn.countDocuments();
+
+  let query = {};
+
+  if (search) {
+    const products = await Product.find({
+      name: { $regex: search, $options: "i" },
+    }).select("_id");
+    const productIds = products.map((p) => p._id);
+    query.productId = { $in: productIds };
+  }
+
+  const totalItems = await StockIn.countDocuments(query);
   const totalPages = Math.ceil(totalItems / limit);
-  const stockIn = await StockIn.find()
+
+  const stockIn = await StockIn.find(query)
     .populate({
       path: "productId",
-      populate: {
-        path: "category",
-        select: "name",
-      },
+      populate: { path: "category", select: "name" },
     })
     .skip(skip)
     .limit(limit);
 
-  if (!stockIn) throw new Error("No stock in found");
-
   return {
     stockIn,
-    pagination: {
-      totalItems,
-      total: stockIn.length,
-      page,
-      limit,
-      totalPages,
-    },
+    pagination: { totalItems, page, limit, totalPages },
   };
 }
 

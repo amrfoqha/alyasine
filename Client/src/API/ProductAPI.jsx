@@ -9,10 +9,15 @@ export const createProduct = async (product) => {
   }
 };
 
-export const getAllProductsByCategoryByPage = async (id, page, limit) => {
+export const getAllProductsByCategoryByPage = async (
+  id,
+  page,
+  limit,
+  search,
+) => {
   try {
     const response = await BaseAPI.get(
-      `/products/category/${id}?page=${page}&limit=${limit}`,
+      `/products/category/${id}?page=${page}&limit=${limit}&search=${search}`,
     );
     return response.data;
   } catch (error) {

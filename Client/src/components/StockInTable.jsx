@@ -23,8 +23,11 @@ const StockInTable = ({ stockIn }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {stockIn.map((stockIn) => (
-              <tr className="hover:bg-blue-50/50 transition-colors text-sm md:text-base">
+            {stockIn.map((stockIn, index) => (
+              <tr
+                key={index}
+                className="hover:bg-blue-50/50 transition-colors text-sm md:text-base"
+              >
                 <td className="p-4 text-gray-500">
                   {stockIn.date.split("T")[0]}
                 </td>
@@ -36,7 +39,11 @@ const StockInTable = ({ stockIn }) => {
                   {Object.entries(stockIn.productId.attributes).length > 0 ? (
                     Object.entries(stockIn.productId.attributes).map(
                       ([key, value], index) => (
-                        <Typography variant="caption" color="textSecondary">
+                        <Typography
+                          key={index}
+                          variant="caption"
+                          color="textSecondary"
+                        >
                           {key}: {value}
                           {index ===
                           Object.entries(stockIn.productId.attributes).length -

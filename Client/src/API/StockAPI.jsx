@@ -18,10 +18,10 @@ export const stockOut = async (stockData) => {
   }
 };
 
-export const getStockIn = async (page = 1, limit = 5) => {
+export const getStockIn = async (page = 1, limit = 5, search = "") => {
   try {
     const response = await BaseAPI.get(
-      `/stock/stockin?page=${page}&limit=${limit}`,
+      `/stock/stockin?page=${page}&limit=${limit}&search=${search}`,
     );
     return response.data;
   } catch (error) {
@@ -29,10 +29,10 @@ export const getStockIn = async (page = 1, limit = 5) => {
   }
 };
 
-export const getStockOut = async (page = 1, limit = 5) => {
+export const getStockOut = async (page = 1, limit = 5, search = "") => {
   try {
     const response = await BaseAPI.get(
-      `/stock/stockout?page=${page}&limit=${limit}`,
+      `/stock/stockout?page=${page}&limit=${limit}&search=${search}`,
     );
     return response.data;
   } catch (error) {
