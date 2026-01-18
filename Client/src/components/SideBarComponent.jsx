@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LogoutButton from "./LogoutButton";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -30,6 +30,9 @@ const SideBarComponent = () => {
     }
     return location.pathname;
   });
+  useEffect(() => {
+    setCurrentPath(location.pathname);
+  }, [location.pathname]);
   return (
     <div className="w-42 min-h-screen bg-gray-800 text-white ">
       <div className="flex flex-col justify-between h-full py-5  ">
@@ -44,14 +47,14 @@ const SideBarComponent = () => {
           <NavButton
             navigate={navigate}
             path="/inventory"
-            label="Inventory"
+            label="المخزون"
             setCurrentPath={setCurrentPath}
             currentPath={currentPath}
           />
           <NavButton
             navigate={navigate}
-            path="/profile"
-            label="Profile"
+            path="/stockin"
+            label="الوارد"
             setCurrentPath={setCurrentPath}
             currentPath={currentPath}
           />

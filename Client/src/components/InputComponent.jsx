@@ -8,6 +8,7 @@ const InputComponent = ({
   onChange,
   disabled,
   className,
+  placeholder,
 }) => {
   return (
     <div className="flex items-center justify-end gap-2" dir="rtl">
@@ -25,6 +26,7 @@ const InputComponent = ({
         onChange={onChange}
         className={`border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className} `}
         disabled={disabled || false}
+        placeholder={placeholder}
       />
     </div>
   );

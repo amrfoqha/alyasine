@@ -1,11 +1,11 @@
 import Pagination from "@mui/material/Pagination";
 
-const UsePagination = ({ currentPage, setCurrentPage, totalPages }) => {
+const UsePagination = ({ Page, setPage, totalPages }) => {
   return (
     <Pagination
       count={totalPages}
-      page={currentPage}
-      onChange={(e, value) => setCurrentPage(value)}
+      page={Page}
+      onChange={(e, value) => setPage(value)}
       siblingCount={1}
       boundaryCount={2}
       showFirstButton

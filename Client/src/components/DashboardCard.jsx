@@ -1,0 +1,56 @@
+import React from "react";
+import { Paper, Typography, Box } from "@mui/material";
+import { motion } from "framer-motion";
+
+const DashboardCard = ({ title, value, icon, color = "primary", children }) => {
+  return (
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: 4,
+          border: "1px solid",
+          borderColor: "divider",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.05)",
+        }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            color="text.secondary"
+            fontWeight={600}
+          >
+            {title}
+          </Typography>
+          <Box
+            sx={{
+              p: 1.5,
+              borderRadius: 3,
+              bgcolor: `${color}.50`,
+              color: `${color}.main`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {icon}
+          </Box>
+        </Box>
+        <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>
+          {value}
+        </Typography>
+        {children && <Box sx={{ mt: 1 }}>{children}</Box>}
+      </Paper>
+    </motion.div>
+  );
+};
+
+export default DashboardCard;

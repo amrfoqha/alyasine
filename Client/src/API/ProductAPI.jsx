@@ -12,7 +12,7 @@ export const createProduct = async (product) => {
 export const getAllProductsByCategoryByPage = async (id, page, limit) => {
   try {
     const response = await BaseAPI.get(
-      `/products/category/${id}?page=${page}&limit=${limit}`
+      `/products/category/${id}?page=${page}&limit=${limit}`,
     );
     return response.data;
   } catch (error) {

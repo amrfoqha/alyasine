@@ -177,8 +177,8 @@ const AddProductForm = ({ productCategory, setProducts }) => {
       };
 
       const res = await createProduct(product);
-
-      setProducts((prev) => [...prev, product]);
+      console.log(res);
+      setProducts((prev) => [...prev, res]);
       setName("");
       setSellPrice("");
       setUnit("");

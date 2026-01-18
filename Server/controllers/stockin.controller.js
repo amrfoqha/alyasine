@@ -17,3 +17,21 @@ exports.stockOut = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
+exports.getAllStockIn = async (req, res) => {
+  try {
+    const result = await stockService.getAllStockIn();
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.getAllStockOut = async (req, res) => {
+  try {
+    const result = await stockService.getAllStockOut();
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
