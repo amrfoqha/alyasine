@@ -10,6 +10,7 @@ import ProductsPage from "./pages/ProductsPage";
 import StockInPage from "./pages/StockInPage";
 import { Toaster } from "react-hot-toast";
 import NotFoundPage from "./pages/NotFoundPage";
+import CustomerPage from "./pages/CustomerPage";
 // import ProfilePage from "./pages/ProfilePage";
 // import SettingsPage from "./pages/SettingsPage";
 function App() {
@@ -31,7 +32,7 @@ function App() {
           <Route path="inventory" element={<InventoryPage />} />
           <Route path="product/:id" element={<ProductsPage />} />
           <Route path="stockin" element={<StockInPage />} />
-
+          <Route path="customer" element={<CustomerPage />} />
           {/* <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} /> */}
           <Route path="*" element={<NotFoundPage />} />

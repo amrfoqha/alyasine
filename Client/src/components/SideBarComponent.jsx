@@ -60,8 +60,8 @@ const SideBarComponent = () => {
           />
           <NavButton
             navigate={navigate}
-            path="/settings"
-            label="الإعدادات"
+            path="/customer"
+            label="الزبائن"
             setCurrentPath={setCurrentPath}
             currentPath={currentPath}
           />
