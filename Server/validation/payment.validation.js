@@ -1,7 +1,7 @@
-import Customer from "../models/customer.model.js";
-import Invoice from "../models/invoice.model.js";
+const Customer = require("../models/customer.model");
+const Invoice = require("../models/invoices.model");
 
-export const validatePayment = async (req, res, next) => {
+module.exports.validatePayment = async (req, res, next) => {
   try {
     const { customer, invoice, amount, method } = req.body;
 

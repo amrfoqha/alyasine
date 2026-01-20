@@ -70,7 +70,6 @@ module.exports.login = async (req, res) => {
 
 module.exports.refresh = async (req, res) => {
   const { refreshToken } = req.body;
-
   if (!refreshToken) {
     return res.status(401).json({ message: "Missing refresh token" });
   }
@@ -86,7 +85,7 @@ module.exports.refresh = async (req, res) => {
   const accessToken = jwt.sign(
     { id: storedToken.user },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "1h" },
   );
 
   res.json({ accessToken });

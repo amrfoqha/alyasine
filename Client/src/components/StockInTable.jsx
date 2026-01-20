@@ -7,7 +7,7 @@ const StockInTable = ({ stockIn }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 flex flex-col justify-center items-center"
+      className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 flex flex-col justify-center items-center w-full"
     >
       <div className="overflow-x-auto w-full">
         <table className="w-full text-right border-collapse">

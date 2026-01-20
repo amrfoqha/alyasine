@@ -10,12 +10,64 @@ module.exports.createInvoice = async (req, res) => {
   }
 };
 
+const mongoose = require("mongoose");
+
 module.exports.findAllInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find();
-    res.json(invoices);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit) || 10, 1);
+    const skip = (page - 1) * limit;
+    const search = req.query.search?.trim();
+
+    const pipeline = [
+      {
+        $lookup: {
+          from: "customers",
+          localField: "customer",
+          foreignField: "_id",
+          as: "customerData",
+        },
+      },
+      { $unwind: "$customerData" },
+    ];
+
+    if (search) {
+      pipeline.push({
+        $match: {
+          "customerData.name": { $regex: search, $options: "i" },
+        },
+      });
+    }
+
+    pipeline.push({ $skip: skip }, { $limit: limit });
+
+    const invoices = await Invoice.aggregate(pipeline);
+    const countPipeline = pipeline.filter(
+      (stage) => !("$skip" in stage) && !("$limit" in stage),
+    );
+
+    countPipeline.push({ $count: "totalItems" });
+
+    const countResult = await Invoice.aggregate(countPipeline);
+    const totalItems = countResult[0]?.totalItems || 0;
+    const totalPages = Math.ceil(totalItems / limit);
+    const invoicesCount = await Invoice.countDocuments();
+
+    res.json({
+      invoices,
+      pagination: {
+        totalItems,
+        totalPages,
+        page,
+        limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        invoicesCount,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Find Invoices Error:", error);
+    res.status(500).json({ message: "Failed to fetch invoices" });
   }
 };
 

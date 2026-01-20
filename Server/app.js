@@ -9,7 +9,7 @@ const invoiceRoutes = require("./routes/invoice.routes.js");
 const paymentRoutes = require("./routes/payment.routes.js");
 const stockRoutes = require("./routes/stock.routes.js");
 const authRoutes = require("./routes/auth.routes.js");
-
+const dashboardRoutes = require("./routes/dashboard.routes.js");
 const { protect } = require("./middleware/auth.middleware.js");
 const { errorHandler } = require("./middleware/error.middleware.js");
 
@@ -27,6 +27,7 @@ app.use("/api/categories", protect, categoryRoutes);
 app.use("/api/invoices", protect, invoiceRoutes);
 app.use("/api/payments", protect, paymentRoutes);
 app.use("/api/stock", protect, stockRoutes);
+app.use("/api/dashboard", protect, dashboardRoutes);
 
 app.use(errorHandler);
 

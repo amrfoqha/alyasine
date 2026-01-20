@@ -5,6 +5,7 @@ import CategoryCard from "../components/CategoryCard";
 import AddCategoryForm from "../components/AddCategoryForm";
 import { motion } from "framer-motion";
 import UsePagination from "../context/UsePagination";
+import { Label, LabelImportant } from "@mui/icons-material";
 const InventoryPage = () => {
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
@@ -46,6 +47,11 @@ const InventoryPage = () => {
           transition={{ duration: 0.5 }}
           className="flex flex-col mt-4 w-3/4"
         >
+          <div className="flex justify-center w-full">
+            <h1 className="text-center text-2xl py-4 text-gray-500">
+              لإضافة منتج جديد إضغط على الفئة الخاصة بالمنتج
+            </h1>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-5 ">
             {products.map((product, idx) => (
               <CategoryCard product={product} key={idx} />

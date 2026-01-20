@@ -1,0 +1,21 @@
+import BaseAPI from "./BaseAPI";
+
+export const getInvoices = async (page, limit, search) => {
+  try {
+    const response = await BaseAPI.get(
+      `/invoices?page=${page}&limit=${limit}&search=${search}`,
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};
+
+export const createInvoice = async (invoice) => {
+  try {
+    const response = await BaseAPI.post("/invoices", invoice);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};

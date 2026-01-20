@@ -34,7 +34,7 @@ const invoiceSchema = new mongoose.Schema(
 
     paymentType: {
       type: String,
-      enum: ["cash", "credit"],
+      enum: ["cash", "bank", "check"],
       required: true,
     },
 
@@ -45,7 +45,7 @@ const invoiceSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Invoice", invoiceSchema);

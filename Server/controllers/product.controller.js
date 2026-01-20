@@ -95,7 +95,6 @@ module.exports.getAllProductsByCategoryByPage = async (req, res) => {
       .populate("category")
       .skip(skip)
       .limit(limit);
-    console.log(products);
     res.json({
       products,
       pagination: {
