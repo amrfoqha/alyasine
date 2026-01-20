@@ -1,20 +1,14 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  InputAdornment,
-  Chip,
-} from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Box, Typography, Chip } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import AddBoxIcon from "@mui/icons-material/AddBox";
-import { motion, observeTimeline } from "framer-motion";
+import { motion } from "framer-motion";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
 import { getStockIn } from "../API/StockAPI";
 import UsePagination from "../context/UsePagination";
 import StockInTable from "../components/StockInTable";
+import SearchBox from "../components/SearchBox";
 
 const StockInPage = () => {
   const navigate = useNavigate();
@@ -55,7 +49,7 @@ const StockInPage = () => {
           alignItems: "center",
           mb: 8,
           mt: 4,
-          px: 4,
+          px: 8,
         }}
       >
         <Typography variant="h4" fontWeight="bold" color="primary">
@@ -69,39 +63,31 @@ const StockInPage = () => {
           إضافة شحنة جديدة
         </button>
       </Box>
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 mb-6 flex gap-4 items-center"
-      >
-        <TextField
-          placeholder="ابحث باسم المنتج..."
-          variant="outlined"
-          size="small"
-          fullWidth
-          onChange={handleSearch}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ maxWidth: 400 }}
-        />
-        <Chip
-          icon={<FilterListIcon />}
-          label="تصفية حسب الفئة"
-          onClick={() => {}}
-          clickable
-          variant="outlined"
-          sx={{ maxWidth: 400, px: 2, py: 1, fontSize: "1rem" }}
-        />
-      </motion.div>
+      <div className="flex flex-col justify-start bg-white px-8 pt-8 mx-8 rounded-2xl shadow-xl border border-gray-100 mb-6 w- gap-4 items-center mt-2">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6 flex gap-4 items-center w-full"
+        >
+          <SearchBox onChange={handleSearch} />
+          <Chip
+            icon={<FilterListIcon />}
+            label="تصفية حسب الفئة"
+            onClick={() => {}}
+            clickable
+            variant="outlined"
+            sx={{ maxWidth: 400, px: 2, py: 1, fontSize: "1rem" }}
+          />
+        </motion.div>
 
-      <StockInTable stockIn={stockIn} />
-      <div className="flex justify-center mt-5">
-        <UsePagination Page={Page} setPage={setPage} totalPages={totalPages} />
+        <StockInTable stockIn={stockIn} />
+        <div className="flex justify-center ">
+          <UsePagination
+            Page={Page}
+            setPage={setPage}
+            totalPages={totalPages}
+          />
+        </div>
       </div>
     </div>
   );

@@ -2,11 +2,19 @@ import React from "react";
 import { Paper, Typography, Box } from "@mui/material";
 import { motion } from "framer-motion";
 
-const DashboardCard = ({ title, value, icon, color = "primary", children }) => {
+const DashboardCard = ({
+  title,
+  value,
+  icon,
+  color = "primary",
+  children,
+  className,
+}) => {
   return (
     <motion.div
       whileHover={{ y: -5 }}
       transition={{ type: "spring", stiffness: 300 }}
+      className={className}
     >
       <Paper
         elevation={0}

@@ -10,9 +10,9 @@ const NavButton = ({ navigate, path, label, setCurrentPath, currentPath }) => {
           navigate(path);
           setCurrentPath(path);
         }}
-        className="text-white hover:text-gray-300 cursor-pointer hover:bg-gray-700 p-4 w-full "
+        className="text-white hover:text-gray-300 cursor-pointer hover:bg-gray-900 p-4 w-full "
         style={{
-          backgroundColor: currentPath === path ? "#3b3b3b" : "transparent",
+          backgroundColor: currentPath === path ? "#101828" : "transparent",
         }}
       >
         {label}
@@ -34,9 +34,9 @@ const SideBarComponent = () => {
     setCurrentPath(location.pathname);
   }, [location.pathname]);
   return (
-    <div className="w-42 min-h-screen bg-gray-800 text-white ">
-      <div className="flex flex-col justify-between h-full py-5  ">
-        <ul className="flex flex-col gap-8 text-center text-xl pt-4 sticky top-0">
+    <div className="w-64 min-h-screen bg-gray-900/90 text-white flex flex-col">
+      <div className="flex flex-col justify-between sticky top-0 z-50  min-h-screen py-5">
+        <ul className="flex flex-col gap-2 text-xl pt-13">
           <NavButton
             navigate={navigate}
             path="/dashboard"
@@ -60,13 +60,27 @@ const SideBarComponent = () => {
           />
           <NavButton
             navigate={navigate}
-            path="/settings"
-            label="الإعدادات"
+            path="/expense"
+            label="المبيعات / الصادر"
+            setCurrentPath={setCurrentPath}
+            currentPath={currentPath}
+          />
+          <NavButton
+            navigate={navigate}
+            path="/invoice"
+            label="إدارة الفواتير"
+            setCurrentPath={setCurrentPath}
+            currentPath={currentPath}
+          />
+          <NavButton
+            navigate={navigate}
+            path="/customer"
+            label="الزبائن"
             setCurrentPath={setCurrentPath}
             currentPath={currentPath}
           />
         </ul>
-        <div className="w-full px-6 sticky bottom-0">
+        <div className="w-full px-4 mt-auto">
           <LogoutButton className="w-full" />
         </div>
       </div>

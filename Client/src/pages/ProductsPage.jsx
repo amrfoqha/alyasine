@@ -2,19 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { getProductCategoryById } from "../API/ProductCategoryAPI";
-import AddProductForm from "../components/AddProductForm";
 import BackButton from "../components/BackButton";
 import ProductsTable from "../components/ProductsTable";
 import { getAllProductsByCategoryByPage } from "../API/ProductAPI";
 import UsePagination from "../context/UsePagination";
 import { motion } from "framer-motion";
 import AddProductDialog from "../components/AddProductDialog";
-import ButtonComponent from "../components/ButtonComponent";
-import SearchBox from "../components/SearchBox";
-import { TextField, InputAdornment, Button, Stack } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { Button, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import AddStockDialog from "../components/AddStockDialog";
+import SearchBox from "../components/SearchBox";
 const ProductsPage = () => {
   const { id } = useParams();
   const [productCategory, setProductCategory] = useState({});
@@ -96,61 +92,62 @@ const ProductsPage = () => {
           setProducts={setProducts}
         />
       </motion.section>
-      <Stack
-        direction="row"
-        spacing={2}
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ mb: 3, backgroundColor: "#f8f9fa", p: 2, borderRadius: "15px" }}
-      >
-        {/* خانة البحث */}
-        <TextField
-          placeholder="ابحث عن منتج..."
-          onChange={handleSearch}
-          size="small"
-          sx={{ width: "300px", backgroundColor: "white", direction: "rtl" }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="end">
-                <SearchIcon color="action" />
-              </InputAdornment>
-            ),
-          }}
-        />
 
-        {/* زر فتح الـ Dialog */}
-        <Button
-          variant="outlined"
-          startIcon={<AddIcon />}
-          onClick={() => setOpen(true)}
+      <section className="w-full px-8 ">
+        <Stack
+          direction="row"
+          spacing={2}
+          alignItems="center"
+          justifyContent="space-between"
           sx={{
-            background: "linear-gradient(135deg, #1E2939, #193CB8)",
-            px: 3,
-            py: 1,
-            borderRadius: "10px",
-            fontSize: "16px",
-            color: "white",
+            mb: 3,
+            p: 2,
+            backgroundColor: "#ffffff",
+            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+
+            borderRadius: "15px",
+            px: 8,
           }}
         >
-          إضافة منتج جديد
-        </Button>
-      </Stack>
+          {/* خانة البحث */}
+          <SearchBox onChange={handleSearch} />
 
-      {products.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col gap-4 justify-center items-center"
-        >
-          <ProductsTable products={products} setProducts={setProducts} />
-          <UsePagination
-            page={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
-        </motion.section>
-      )}
+          {/* زر فتح الـ Dialog */}
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setOpen(true)}
+            sx={{
+              background: "linear-gradient(135deg, #1E2939, #193CB8)",
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              fontSize: "16px",
+              color: "white",
+            }}
+          >
+            إضافة منتج جديد
+          </Button>
+        </Stack>
+      </section>
+
+      <section className="w-full px-8">
+        {products.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col gap-4 justify-center items-center bg-white px-8 shadow-2xl border border-gray-100 mb-6 rounded-2xl"
+          >
+            <ProductsTable products={products} setProducts={setProducts} />
+            <UsePagination
+              page={page}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
+          </motion.section>
+        )}
+      </section>
     </div>
   );
 };

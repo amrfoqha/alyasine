@@ -1,8 +1,8 @@
-import ProductCategory from "../models/ProductCategory.js";
+const ProductCategory = require("../models/productCategories.model");
 
-export const validateProduct = async (req, res, next) => {
+module.exports.validateProduct = async (req, res, next) => {
   try {
-    const { name, categoryId, price, quantity, attributes } = req.body;
+    const { name, categoryId, price, attributes } = req.body;
 
     if (!name || name.trim() === "")
       return res.status(400).json({ message: "Product name is required" });
@@ -16,9 +16,6 @@ export const validateProduct = async (req, res, next) => {
 
     if (price === undefined || price <= 0)
       return res.status(400).json({ message: "Price must be greater than 0" });
-
-    if (quantity === undefined || quantity < 0)
-      return res.status(400).json({ message: "Quantity must be 0 or greater" });
 
     if (attributes && typeof attributes !== "object")
       return res.status(400).json({ message: "Attributes must be an object" });

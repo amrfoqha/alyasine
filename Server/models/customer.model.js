@@ -4,6 +4,7 @@ const customerSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      unique: true,
     },
     phone: {
       type: String,
@@ -15,12 +16,12 @@ const customerSchema = new mongoose.Schema(
     },
     balance: {
       type: Number,
-      required: true,
+      default: 0,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 const customerModel = mongoose.model("Customer", customerSchema);
 module.exports = customerModel;

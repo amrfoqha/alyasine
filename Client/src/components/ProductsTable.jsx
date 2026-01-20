@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import ButtonComponent from "../components/ButtonComponent";
 import { deleteProduct } from "../API/ProductAPI";
 import { motion } from "framer-motion";
-import DeleteIcon from "@mui/icons-material/Delete"; // أضف أيقونات لمظهر احترافي
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import AddStockDialog from "./AddStockDialog";
 import { toast } from "react-hot-toast";
+import DeleteButton from "./DeleteButton";
 
 const ProductsTable = ({ products, setProducts }) => {
   const handleDelete = async (id) => {
@@ -35,7 +35,7 @@ const ProductsTable = ({ products, setProducts }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       // أضفنا خلفية بيضاء، ظل خفيف، وزوايا مستديرة للحاوية
-      className="mx-auto mt-10 w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100 px-2 h-100"
+      className="mx-auto mt-10 w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-100"
     >
       <AddStockDialog
         open={openAddStockDialog}
@@ -101,13 +101,9 @@ const ProductsTable = ({ products, setProducts }) => {
                     <AddBoxIcon fontSize="small" />
                     مخزون
                   </button>
-                  <button
-                    onClick={() => handleDelete(product._id)}
-                    className="flex items-center gap-1 bg-red-50 text-red-500 px-3 py-2 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200 text-sm font-semibold shadow-sm"
-                  >
-                    <DeleteIcon fontSize="small" />
-                    حذف
-                  </button>
+                  <DeleteButton
+                    handleDelete={() => handleDelete(product._id)}
+                  />
                 </div>
               </td>
             </tr>

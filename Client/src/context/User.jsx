@@ -1,83 +1,113 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Auth } from "./Auth";
-import { LoginAPI, RegisterAPI, LogoutAPI } from "../API/AuthAPI";
+import {
+  LoginAPI,
+  RegisterAPI,
+  LogoutAPI,
+  refreshAccessToken,
+} from "../API/AuthAPI.jsx";
+import BaseAPI from "../API/BaseAPI";
+
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
-    try {
-      return saved && saved !== "undefined" ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
+    return saved && saved !== "undefined" ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState(localStorage.getItem("token") || "");
   const [refreshToken, setRefreshToken] = useState(
-    localStorage.getItem("refreshToken") || ""
+    localStorage.getItem("refreshToken") || "",
   );
+  const [loading, setLoading] = useState(true);
+
+  const saveAuthData = (userData, accessToken, refreshData) => {
+    setUser(userData);
+    setToken(accessToken);
+    setRefreshToken(refreshData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", accessToken);
+    localStorage.setItem("refreshToken", refreshData);
+    BaseAPI.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+  };
+
   const login = async (name, password) => {
     try {
       const response = await LoginAPI(name, password);
-      const { accessToken, refreshToken, user } = response;
-      setUser(user);
-      localStorage.setItem("user", JSON.stringify(user || ""));
-      setToken(accessToken || "");
-      localStorage.setItem("token", accessToken || "");
-      setRefreshToken(refreshToken || "");
-      localStorage.setItem("refreshToken", refreshToken || "");
+      saveAuthData(response.user, response.accessToken, response.refreshToken);
       return { success: true };
     } catch (error) {
       console.log(error);
-      return { success: false };
+      return { success: false, message: error.message || "فشل تسجيل الدخول" };
     }
   };
-
   const register = async (name, password, confirmPassword) => {
     try {
       const response = await RegisterAPI(name, password, confirmPassword);
       const { accessToken, refreshToken, user } = response;
-      setUser(user);
-      localStorage.setItem("user", JSON.stringify(user || ""));
-      setToken(accessToken || "");
-      localStorage.setItem("token", accessToken || "");
-      setRefreshToken(refreshToken || "");
-      localStorage.setItem("refreshToken", refreshToken || "");
+      saveAuthData(user, accessToken, refreshToken);
       return { success: true };
     } catch (error) {
-      console.log(error);
-      return { success: false };
+      console.error("Register Error:", error);
+      return { success: false, message: error.message || "فشل إنشاء الحساب" };
     }
   };
 
   const logout = async () => {
     try {
-      const response = await LogoutAPI(user);
-      console.log(response);
-      setUser(null);
-      localStorage.removeItem("user");
-      setToken(null);
-      localStorage.removeItem("token");
-      setRefreshToken(null);
-      localStorage.removeItem("refreshToken");
-      return { success: true };
+      await LogoutAPI(user);
     } catch (error) {
-      console.log(error);
-      return { success: false };
+      console.log("Logout error:", error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      setRefreshToken(null);
+      localStorage.clear();
+      delete BaseAPI.defaults.headers.common["Authorization"];
     }
   };
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem("token");
+      const storedRefresh = localStorage.getItem("refreshToken");
+
+      if (!storedToken || !storedRefresh) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const data = await refreshAccessToken(storedRefresh);
+        saveAuthData(
+          user,
+          data.accessToken,
+          data.refreshToken || storedRefresh,
+        );
+      } catch (err) {
+        console.log("Session expired");
+        logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
   const isAuthenticated = !!token && !!user;
+
   return (
     <Auth.Provider
       value={{
         user,
         login,
+        register,
         logout,
         token,
-        refreshToken,
-        register,
+        loading,
         isAuthenticated,
       }}
     >
-      {children}
+      {!loading && children}
     </Auth.Provider>
   );
 };
