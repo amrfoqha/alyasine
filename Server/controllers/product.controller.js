@@ -111,3 +111,15 @@ module.exports.getAllProductsByCategoryByPage = async (req, res) => {
     res.status(500).json({ message: "Server error while fetching products" });
   }
 };
+
+module.exports.getAllProductsNames = async (req, res) => {
+  try {
+    const products = await Product.find(
+      { isDeleted: false },
+      { name: 1 },
+    ).lean();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -96,3 +96,12 @@ module.exports.getCustomerNames = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+module.exports.getAllCustomers = async (req, res) => {
+  try {
+    const customers = await Customer.find({}).lean();
+    res.json(customers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

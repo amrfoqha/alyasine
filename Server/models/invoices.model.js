@@ -8,28 +8,54 @@ const invoiceSchema = new mongoose.Schema(
       required: true,
     },
 
-    items: [
-      {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
+    items: {
+      type: [
+        {
+          product: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
+          },
+          quantity: {
+            type: Number,
+            required: true,
+            min: 1,
+          },
+          price: {
+            type: Number,
+            required: true,
+            min: 0,
+          },
         },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
+      ],
+      validate: [
+        {
+          validator: (v) => v.length > 0,
+          message: "الفاتورة يجب أن تحتوي على صنف واحد على الأقل",
         },
-        price: {
-          type: Number,
-          required: true,
-        },
-      },
-    ],
+      ],
+    },
 
     total: {
       type: Number,
-      required: true,
+      min: 0,
+    },
+
+    paidAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    remainingAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    status: {
+      type: String,
+      enum: ["paid", "partial", "unpaid"],
+      default: "unpaid",
     },
 
     paymentType: {
@@ -43,9 +69,28 @@ const invoiceSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
+
+invoiceSchema.pre("save", async function () {
+  // حساب الإجمالي
+  this.total = this.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
+  // التحقق من المبلغ المدفوع
+  if (this.paidAmount > this.total) {
+    throw new Error("المبلغ المدفوع لا يمكن أن يكون أكبر من الإجمالي");
+  }
+
+  // حساب الباقي
+  this.remainingAmount = this.total - this.paidAmount;
+
+  // تحديث الحالة
+  if (this.paidAmount === 0) this.status = "unpaid";
+  else if (this.paidAmount < this.total) this.status = "partial";
+  else this.status = "paid";
+});
 
 module.exports = mongoose.model("Invoice", invoiceSchema);

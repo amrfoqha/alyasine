@@ -51,3 +51,22 @@ export const deleteProduct = async (id) => {
     throw error.response?.data;
   }
 };
+
+export const getProductsName = async () => {
+  try {
+    const response = await BaseAPI.get("/products/names");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};
+
+export const getProducts = async () => {
+  try {
+    const response = await BaseAPI.get("/products");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};
+

@@ -1,17 +1,42 @@
 import React from "react";
+import Select from "react-select";
 
-const SelectComponent = ({ label, name, value, onChange, options }) => {
+const SelectComponent = ({
+  label,
+  name,
+  value,
+  onChange,
+  options = [],
+  optionLabel = "name",
+  optionValue = "_id",
+  placeholder = "اختر...",
+  className = "",
+}) => {
+  //   const formattedOptions = options.map((option) => ({
+  //     _id: option[optionValue],
+  //     name: option[optionLabel],
+  //   }));
+
+  const selectedOption = options.find((opt) => opt._id === value) || null;
+
   return (
-    <div className="flex flex-col gap-1 justify-items-end">
-      <label htmlFor={name}>{label}</label>
-      <select name={name} onChange={onChange} value={value}>
-        <option value="">اختر</option>
-        {options.map((option) => (
-          <option key={option._id} value={option._id}>
-            {option.name}
-          </option>
-        ))}
-      </select>
+    <div className={`flex flex-row gap-2 items-center  w-full ${className}`}>
+      <label className="text-xl font-bold text-gray-900 w-auto">{label}</label>
+
+      <div className="flex-1 w-full">
+        <Select
+          name={name}
+          options={options}
+          value={selectedOption}
+          getOptionLabel={(option) => option[optionLabel]}
+          getOptionValue={(option) => option[optionValue]}
+          onChange={onChange}
+          isClearable
+          isSearchable
+          placeholder={placeholder}
+          className="w-full min-w-48 max-w-48"
+        />
+      </div>
     </div>
   );
 };

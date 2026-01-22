@@ -1,6 +1,13 @@
 import React from "react";
 
-const ButtonComponent = ({ label, className, onClick, type, disabled }) => {
+const ButtonComponent = ({
+  label,
+  className,
+  onClick,
+  type,
+  disabled,
+  icon,
+}) => {
   const disabledClass = disabled
     ? "bg-red-500 p-2 rounded-md cursor-not-allowed"
     : "bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 cursor-pointer";
@@ -11,6 +18,7 @@ const ButtonComponent = ({ label, className, onClick, type, disabled }) => {
       type={type}
       disabled={disabled}
     >
+      {icon && icon}
       {label}
     </button>
   );

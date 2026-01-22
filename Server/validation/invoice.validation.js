@@ -3,42 +3,54 @@ const Product = require("../models/products.model");
 
 module.exports.validateInvoice = async (req, res, next) => {
   try {
-    const { customerId, items, paymentType } = req.body;
+    const { customer, items, paymentType, paidAmount = 0 } = req.body;
 
-    if (!customerId)
+    // ✅ تحقق من وجود العميل
+    if (!customer)
       return res.status(400).json({ message: "Customer required" });
 
-    const customer = await Customer.findById(customerId);
-    if (!customer)
+    const customerFound = await Customer.findById(customer);
+    if (!customerFound)
       return res.status(404).json({ message: "Customer not found" });
 
+    // ✅ تحقق من وجود أصناف
     if (!items || !items.length)
       return res.status(400).json({ message: "Invoice must have items" });
 
+    // ✅ تحقق من paidAmount
+    if (paidAmount < 0)
+      return res.status(400).json({ message: "Invalid paid amount" });
+
+    // ✅ تحقق من طريقة الدفع
+    if (!["cash", "bank", "check"].includes(paymentType))
+      return res.status(400).json({ message: "Invalid payment type" });
+
+    // ✅ جلب جميع المنتجات مرة واحدة
+    const productIds = items.map((i) => i.product);
+    const products = await Product.find({ _id: { $in: productIds } }).lean();
+    const productMap = new Map(products.map((p) => [p._id.toString(), p]));
+
     for (const item of items) {
-      if (!item.productId)
+      if (!item.product)
         return res.status(400).json({ message: "Product ID is required" });
 
       if (!item.quantity || item.quantity <= 0)
         return res.status(400).json({ message: "Quantity must be positive" });
 
-      if (!item.price || item.price <= 0)
-        return res.status(400).json({ message: "Price must be positive" });
-
-      const product = await Product.findById(item.productId);
+      const product = productMap.get(item.product.toString());
       if (!product)
         return res
           .status(404)
-          .json({ message: `Product not found: ${item.productId}` });
+          .json({ message: `Product not found: ${item.product}` });
 
       if (product.quantity < item.quantity)
         return res.status(400).json({
-          message: `Not enough stock for product ${product.name}. Available: ${product.quantity}`,
+          message: `Not enough stock for ${product.name}. Available: ${product.quantity}`,
         });
-    }
 
-    if (!["cash", "credit"].includes(paymentType))
-      return res.status(400).json({ message: "Invalid payment type" });
+      // ✅ تثبيت السعر من DB
+      item.price = product.sellPrice;
+    }
 
     next();
   } catch (error) {

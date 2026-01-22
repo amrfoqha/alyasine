@@ -48,10 +48,11 @@ const ProductsTable = ({ products, setProducts }) => {
           <tr>
             <th className="p-4 text-gray-600 font-bold">اسم المنتج</th>
             <th className="p-4 text-gray-600 font-bold">السعر</th>
-            <th className="p-4 text-gray-600 font-bold">الوحدة</th>
             <th className="p-4 text-gray-600 font-bold">الوصف</th>
             <th className="p-4 text-gray-600 font-bold">الخصائص</th>
             <th className="p-4 text-gray-600 font-bold">التصنيف</th>
+            <th className="p-4 text-gray-600 font-bold">الكمية الحالية</th>
+            <th className="p-4 text-gray-600 font-bold">الوحدة</th>
             <th className="p-4 text-gray-600 font-bold text-center">
               الإجراءات
             </th>
@@ -67,7 +68,7 @@ const ProductsTable = ({ products, setProducts }) => {
               <td className="p-4 text-blue-600 font-bold">
                 {product.sellPrice} $
               </td>
-              <td className="p-4 text-gray-500">{product.unit}</td>
+
               <td className="p-4 text-gray-500 max-w-xs truncate">
                 {product.description}
               </td>
@@ -92,6 +93,12 @@ const ProductsTable = ({ products, setProducts }) => {
                   {product.category?.name}
                 </span>
               </td>
+              <td className="p-4">
+                <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-lg text-sm">
+                  {product.quantity}
+                </span>
+              </td>
+              <td className="p-4 text-gray-500">{product.unit}</td>
               <td className="p-4">
                 <div className="flex justify-center gap-3">
                   <button

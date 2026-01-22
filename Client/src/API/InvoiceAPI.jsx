@@ -19,3 +19,12 @@ export const createInvoice = async (invoice) => {
     throw error.response?.data;
   }
 };
+
+export const deleteInvoice = async (id) => {
+  try {
+    const response = await BaseAPI.delete(`/invoices/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};

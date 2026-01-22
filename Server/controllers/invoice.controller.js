@@ -1,16 +1,16 @@
 const Invoice = require("../models/invoices.model");
 const invoiceService = require("../services/invoice.service");
+const mongoose = require("mongoose");
 
 module.exports.createInvoice = async (req, res) => {
   try {
     const invoice = await invoiceService.createInvoice(req.body);
     res.json(invoice);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
 };
-
-const mongoose = require("mongoose");
 
 module.exports.findAllInvoices = async (req, res) => {
   try {
@@ -33,27 +33,26 @@ module.exports.findAllInvoices = async (req, res) => {
 
     if (search) {
       pipeline.push({
-        $match: {
-          "customerData.name": { $regex: search, $options: "i" },
-        },
+        $match: { "customerData.name": { $regex: search, $options: "i" } },
       });
     }
 
     pipeline.push({ $skip: skip }, { $limit: limit });
 
     const invoices = await Invoice.aggregate(pipeline);
+
+    // ===== عدد الفواتير =====
     const countPipeline = pipeline.filter(
       (stage) => !("$skip" in stage) && !("$limit" in stage),
     );
-
     countPipeline.push({ $count: "totalItems" });
-
     const countResult = await Invoice.aggregate(countPipeline);
     const totalItems = countResult[0]?.totalItems || 0;
     const totalPages = Math.ceil(totalItems / limit);
-    const invoicesCount = await Invoice.countDocuments();
+    const totalInvoices = await Invoice.countDocuments();
 
     res.json({
+      totalInvoices,
       invoices,
       pagination: {
         totalItems,
@@ -62,46 +61,43 @@ module.exports.findAllInvoices = async (req, res) => {
         limit,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
-        invoicesCount,
       },
     });
   } catch (error) {
-    console.error("Find Invoices Error:", error);
+    console.error(error);
     res.status(500).json({ message: "Failed to fetch invoices" });
   }
 };
 
+// ===== جلب فاتورة واحدة =====
 module.exports.findInvoice = async (req, res) => {
   try {
-    const invoice = await Invoice.findById(req.params.id);
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
+    const invoice = await invoiceService.getInvoiceById(req.params.id);
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
     res.json(invoice);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+// ===== حذف فاتورة =====
 module.exports.deleteInvoice = async (req, res) => {
   try {
-    const invoice = await Invoice.findByIdAndDelete(req.params.id);
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
-    res.json(invoice);
+    const invoice = await invoiceService.deleteInvoice(req.params.id);
+    if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+    res.json({ message: "Invoice deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
+// ===== جلب فواتير حسب الزبون =====
 module.exports.findInvoiceByCustomer = async (req, res) => {
   try {
-    const invoice = await Invoice.find({ customer: req.params.id });
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
-    res.json(invoice);
+    const invoices = await Invoice.find({ customer: req.params.id });
+    if (!invoices || invoices.length === 0)
+      return res.status(404).json({ message: "Invoices not found" });
+    res.json(invoices);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

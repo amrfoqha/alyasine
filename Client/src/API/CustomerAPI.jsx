@@ -56,3 +56,12 @@ export const getCustomersNames = async () => {
     throw error.response?.data;
   }
 };
+
+export const getAllCustomers = async () => {
+  try {
+    const response = await BaseAPI.get("/customers/all");
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};

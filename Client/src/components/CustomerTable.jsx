@@ -1,5 +1,5 @@
-import { Edit, Edit2, Trash2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Edit2 } from "lucide-react";
+import { useState } from "react";
 import DeleteButton from "./DeleteButton";
 import { deleteCustomer } from "../API/CustomerAPI";
 import { toast } from "react-hot-toast";

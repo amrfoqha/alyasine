@@ -2,55 +2,84 @@ const mongoose = require("mongoose");
 const Invoice = require("../models/invoices.model");
 const Customer = require("../models/customer.model");
 const StockIn = require("../models/stockIn.model");
+const { stockOut } = require("./stock.service");
 
 exports.createInvoice = async (data) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const { customerId, items, paymentType } = data;
+    const { customer, items, paymentType, paidAmount = 0 } = data;
 
-    let total = 0;
+    console.log(items);
+    // تحويل الكميات والأسعار إلى أرقام
+    items.forEach((item) => {
+      item.quantity = Number(item.quantity);
+      item.price = Number(item.price);
+    });
+    // حساب الإجمالي
+    const total = items.reduce(
+      (sum, item) => Number(sum) + Number(item.price) * Number(item.quantity),
+      0,
+    );
 
+    console.log(total);
+
+    // ===== التحقق من المخزون وتحديثه =====
     for (const item of items) {
-      total += item.price * item.quantity;
-
       const stock = await StockIn.aggregate([
-        { $match: { product: new mongoose.Types.ObjectId(item.productId) } },
+        { $match: { productId: new mongoose.Types.ObjectId(item.product) } },
         { $group: { _id: null, totalQty: { $sum: "$quantity" } } },
       ]);
-
+      console.log(stock);
       const availableQty = stock[0]?.totalQty || 0;
-
+      console.log(availableQty);
       if (availableQty < item.quantity) {
-        throw new Error("Not enough stock");
+        throw new Error(`Not enough stock for product ${item.product}`);
       }
 
       await StockIn.findOneAndUpdate(
-        { product: item.productId },
+        { productId: item.product },
         { $inc: { quantity: -item.quantity } },
-        { session }
+        { session },
       );
+
+      await stockOut({
+        productId: item.product,
+        quantity: item.quantity,
+      });
     }
 
+    // ===== حساب المبلغ المتبقي وحالة الفاتورة =====
+    let remainingAmount = total - paidAmount;
+    let status = "unpaid";
+    if (paidAmount === 0) status = "unpaid";
+    else if (paidAmount < total) status = "partial";
+    else status = "paid";
+
+    // ===== تحديث رصيد الزبون إذا الدفع على credit =====
     if (paymentType === "credit") {
       await Customer.findByIdAndUpdate(
-        customerId,
-        { $inc: { balance: total } },
-        { session }
+        customer,
+        { $inc: { balance: remainingAmount } },
+        { session },
       );
     }
 
+    // ===== إنشاء الفاتورة =====
     const invoice = await Invoice.create(
       [
         {
-          customer: customerId,
+          customer,
           items,
           total,
+          paidAmount,
+          remainingAmount,
+          status,
           paymentType,
         },
       ],
-      { session }
+      { session },
     );
 
     await session.commitTransaction();
@@ -62,4 +91,12 @@ exports.createInvoice = async (data) => {
     session.endSession();
     throw error;
   }
+};
+
+exports.getInvoiceById = async (id) => {
+  return Invoice.findById(id).populate("customer");
+};
+
+exports.deleteInvoice = async (id) => {
+  return Invoice.findByIdAndDelete(id);
 };
