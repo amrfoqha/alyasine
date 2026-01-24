@@ -20,7 +20,7 @@ import NoteIcon from "@mui/icons-material/Note";
 import { stockIn } from "../API/StockAPI";
 import { toast } from "react-hot-toast";
 
-const AddStockDialog = ({ open, setOpen, product }) => {
+const AddStockDialog = ({ open, setOpen, product, setProducts }) => {
   const getTodayDate = () => new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = useState({
@@ -78,6 +78,16 @@ const AddStockDialog = ({ open, setOpen, product }) => {
           date: formData.date,
           note: formData.note,
         });
+        setProducts((prevProducts) =>
+          prevProducts.map((p) =>
+            p._id === product._id
+              ? {
+                  ...p,
+                  quantity: Number(p.quantity) + Number(formData.quantity),
+                }
+              : p,
+          ),
+        );
         toast.success("تم إضافة البضاعة بنجاح");
         setOpen(false);
       } catch (error) {

@@ -63,7 +63,7 @@ const CustomerTable = ({ customers, setCustomers }) => {
                 <td className="p-4 text-gray-600 text-sm">{cust?.address}</td>
                 <td className="p-4">
                   <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-bold font-sans mr-4">
-                    {cust.orders?.length || 0}
+                    {cust.orders || 0}
                   </span>
                 </td>
                 <td className="p-4">

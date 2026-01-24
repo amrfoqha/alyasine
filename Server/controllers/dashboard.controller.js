@@ -2,6 +2,7 @@ const productModel = require("../models/products.model");
 const productCategoryModel = require("../models/productCategories.model");
 const customerModel = require("../models/customer.model");
 const stockInModel = require("../models/stockIn.model");
+const invoiceModel = require("../models/invoices.model");
 
 exports.getDashboardData = async (req, res) => {
   try {
@@ -13,8 +14,24 @@ exports.getDashboardData = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5)
       .populate("productId");
-    // const invoicesCount = await invoiceModel.countDocuments();
-    // const paymentsCount = await paymentModel.countDocuments();
+
+    const sales = await invoiceModel.aggregate([
+      { $sort: { createdAt: -1 } },
+      { $limit: 100 },
+      { $group: { _id: null, totalSales: { $sum: "$total" } } },
+    ]);
+
+    const totalMovements = await invoiceModel.countDocuments();
+    const totalDepts = await customerModel.aggregate([
+      { $match: { balance: { $gt: 0 } } },
+      { $group: { _id: null, Depts: { $sum: "$balance" } } },
+    ]);
+
+    // total received from invoices only
+    const totalReceived = await invoiceModel.aggregate([
+      { $match: { paidAmount: { $gt: 0 } } },
+      { $group: { _id: null, received: { $sum: "$paidAmount" } } },
+    ]);
     // const stockInCount = await stockInModel.countDocuments();
     // const stockOutCount = await stockOutModel.countDocuments();
 
@@ -23,6 +40,10 @@ exports.getDashboardData = async (req, res) => {
       productCategoriesCount,
       customersCount,
       lastStockIn,
+      totalSales: sales[0]?.totalSales || 0,
+      totalMovements,
+      totalDepts: totalDepts[0]?.Depts || 0,
+      totalReceived: totalReceived[0]?.received || 0,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

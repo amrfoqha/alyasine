@@ -46,6 +46,7 @@ const AddInvoiceDialog = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
+  const [status, setStatus] = useState("آجل (غير مدفوع)");
 
   // الحسابات المالية
   const total = useMemo(
@@ -108,6 +109,7 @@ const AddInvoiceDialog = ({
       };
       console.log(payload);
       const res = await createInvoice(payload);
+      console.log(res);
       setInvoices((prev) => [res, ...prev]);
       setInvoicesCount((prev) => prev + 1);
       toast.success("تم حفظ الفاتورة بنجاح");
@@ -134,6 +136,17 @@ const AddInvoiceDialog = ({
       fetchProducts();
     }
   }, [open]);
+  useEffect(() => {
+    if (total > 0) {
+      setStatus(
+        Number(paidAmount) === Number(total)
+          ? "بالكامل مدفوع"
+          : Number(paidAmount) < Number(total) && Number(paidAmount) > 0
+            ? "مدفوع جزئياً"
+            : "آجل (غير مدفوع)",
+      );
+    }
+  }, [paidAmount, total]);
 
   return (
     <Dialog
@@ -211,11 +224,7 @@ const AddInvoiceDialog = ({
                   variant="h6"
                   sx={{ color: getStatusColor(), fontWeight: "bold" }}
                 >
-                  {paidAmount === 0
-                    ? "آجل (غير مدفوع)"
-                    : paidAmount < total
-                      ? "دفع جزئي"
-                      : "مدفوع بالكامل"}
+                  {status}
                 </Typography>
               </Card>
             </Grid>
@@ -225,7 +234,12 @@ const AddInvoiceDialog = ({
 
           {/* القسم الثاني: شريط إضافة الأصناف */}
           <Box sx={{ p: 2, bgcolor: "#f9f9f9", borderRadius: 2, mb: 3 }}>
-            <Grid container spacing={2} alignItems="center">
+            <Grid
+              container
+              spacing={2}
+              alignItems="center"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 justify-between"
+            >
               <Grid item xs={12} md={4}>
                 <SelectComponent
                   label="البحث عن منتج"
@@ -235,21 +249,41 @@ const AddInvoiceDialog = ({
                   optionLabel="name"
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={4} className="flex">
+                <label
+                  htmlFor="sellPrice"
+                  className="flex items-center text-lg font-bold"
+                >
+                  سعر
+                  <span className="text-gray-500 text-sm">
+                    {" "}
+                    ({selectedProduct?.unit})
+                  </span>
+                </label>
                 <InputComponent
-                  label="سعر الوحدة"
                   value={selectedProduct?.sellPrice || ""}
                   disabled
+                  name={"sellPrice"}
                   className={"max-w-24"}
                 />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={4} className="flex ">
+                <label
+                  htmlFor="quantity"
+                  className="flex items-center text-lg font-bold"
+                >
+                  الكمية
+                  <span className="text-gray-500 text-sm">
+                    {" "}
+                    ({selectedProduct?.unit})
+                  </span>
+                </label>
                 <InputComponent
-                  label="الكمية"
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                   className={"max-w-24"}
+                  name={"quantity"}
                 />
               </Grid>
               <Grid item xs={12} md={4}>
@@ -324,7 +358,10 @@ const AddInvoiceDialog = ({
                       <TableCell align="center">
                         {item.price.toLocaleString()}
                       </TableCell>
-                      <TableCell align="center">{item.quantity}</TableCell>
+
+                      <TableCell align="center">
+                        {item.product.unit} {item.quantity}
+                      </TableCell>
                       <TableCell align="center">
                         {(item.price * item.quantity).toLocaleString()}
                       </TableCell>

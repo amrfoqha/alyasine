@@ -24,7 +24,7 @@ const InvoiceTable = ({ invoices, setInvoices }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="mx-auto  w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-100"
+      className="mx-auto  w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-120"
     >
       <table className="w-full text-center" dir="rtl">
         <thead className="bg-gray-50 border-b border-gray-100">
@@ -46,16 +46,14 @@ const InvoiceTable = ({ invoices, setInvoices }) => {
             >
               <td className="p-4 flex flex-col gap-2">
                 <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-lg text-sm">
-                  {inv.customerData?.name}
+                  {inv.customer?.name}
                 </span>
                 <div className="text-xs text-gray-500 italic">
-                  {inv.customerData?.phone}
+                  {inv.customer?.phone}
                 </div>
               </td>
-              <td className="p-4">{inv._id.slice(0, 6)}</td>
-              <td className="p-4">
-                {new Date(inv.createdAt).toLocaleDateString()}
-              </td>
+              <td className="p-4">{inv.code}</td>
+              <td className="p-4">{inv.createdAt.split("T")[0]}</td>
               <td className="p-4">
                 <span className="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">
                   ${inv.total}
@@ -76,7 +74,7 @@ const InvoiceTable = ({ invoices, setInvoices }) => {
                   <DeleteButton
                     label="حذف"
                     className="bg-red-500 "
-                    onClick={() => handleDelete(inv._id)}
+                    handleDelete={() => handleDelete(inv._id)}
                   />
                   <ButtonComponent
                     label="عرض الفاتورة"

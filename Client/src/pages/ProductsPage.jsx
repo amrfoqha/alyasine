@@ -11,11 +11,13 @@ import AddProductDialog from "../components/AddProductDialog";
 import { Button, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchBox from "../components/SearchBox";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 const ProductsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [productCategory, setProductCategory] = useState({});
   const [products, setProducts] = useState([]);
-  const [allProducts, setAllProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [open, setOpen] = useState(false);
@@ -25,6 +27,7 @@ const ProductsPage = () => {
     const fetchProductCategoryById = async () => {
       try {
         const productCategory = await getProductCategoryById(id);
+
         setProductCategory(productCategory);
         const res = await getAllProductsByCategoryByPage(
           id,
@@ -33,10 +36,11 @@ const ProductsPage = () => {
           search,
         );
         setProducts(res.products);
-        setAllProducts(res.products);
         setPage(res.pagination.page);
         setTotalPages(res.pagination.totalPages);
       } catch (error) {
+        toast.error("حدث خطأ أثناء جلب المنتجات");
+        navigate("/*");
         console.log(error);
       }
     };

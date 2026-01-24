@@ -22,6 +22,8 @@ const DashboardPage = () => {
     categoriesCount: 0,
     stockIn: [],
     customersCount: 0,
+    totalSales: 0,
+    totalMovements: 0,
   });
   const [recentStrockIn, setRecentStockIn] = useState([]);
   const [salesData, setSalesData] = useState({
@@ -32,8 +34,8 @@ const DashboardPage = () => {
   });
 
   const [paymentsData, setPaymentsData] = useState({
-    totalReceived: "₪0",
-    totalDebt: "₪0",
+    totalReceived: 0,
+    totalDebt: 0,
   });
 
   const alertsData = [
@@ -55,6 +57,12 @@ const DashboardPage = () => {
           categoriesCount: data.productCategoriesCount,
           stockIn: data.lastStockIn,
           customersCount: data.customersCount,
+          totalSales: data.totalSales,
+          totalMovements: data.totalMovements,
+        });
+        setPaymentsData({
+          totalReceived: data.totalReceived,
+          totalDebt: data.totalDepts,
         });
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -136,7 +144,7 @@ const DashboardPage = () => {
               <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <DashboardCard
                   title="مبيعات (آخر 100 حركة)"
-                  value={`₪${salesData.totalSales.toLocaleString()}`}
+                  value={`₪${stats.totalSales.toLocaleString()}`}
                   icon={<TrendingUp />}
                   color="green"
                 >
@@ -144,7 +152,7 @@ const DashboardPage = () => {
                     <span>
                       عدد الحركات:{" "}
                       <span className="text-green-600 font-bold">
-                        {salesData.invoicesCount}
+                        {stats.totalMovements}
                       </span>
                     </span>
                   </div>
@@ -152,7 +160,7 @@ const DashboardPage = () => {
 
                 <DashboardCard
                   title="ديون العملاء"
-                  value={paymentsData.totalDebt}
+                  value={`₪${paymentsData.totalDebt.toLocaleString()}`}
                   icon={<People />}
                   color="red"
                 >

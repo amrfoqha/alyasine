@@ -12,7 +12,7 @@ module.exports.createInvoice = async (req, res) => {
   }
 };
 
-module.exports.findAllInvoices = async (req, res) => {
+module.exports.findAllInvoicesByPage = async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit) || 10, 1);
@@ -25,15 +25,16 @@ module.exports.findAllInvoices = async (req, res) => {
           from: "customers",
           localField: "customer",
           foreignField: "_id",
-          as: "customerData",
+          as: "customer",
         },
       },
-      { $unwind: "$customerData" },
+      { $unwind: "$customer" },
+      { $sort: { createdAt: -1 } },
     ];
 
     if (search) {
       pipeline.push({
-        $match: { "customerData.name": { $regex: search, $options: "i" } },
+        $match: { "customer.name": { $regex: search, $options: "i" } },
       });
     }
 
@@ -97,6 +98,15 @@ module.exports.findInvoiceByCustomer = async (req, res) => {
     const invoices = await Invoice.find({ customer: req.params.id });
     if (!invoices || invoices.length === 0)
       return res.status(404).json({ message: "Invoices not found" });
+    res.json(invoices);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.findAllInvoices = async (req, res) => {
+  try {
+    const invoices = await Invoice.find().sort({ createdAt: -1 });
     res.json(invoices);
   } catch (error) {
     res.status(500).json({ message: error.message });

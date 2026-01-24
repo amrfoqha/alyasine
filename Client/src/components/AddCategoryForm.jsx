@@ -14,7 +14,7 @@ const AddCategoryForm = ({ setProducts, products }) => {
     e.preventDefault();
     try {
       const product = await createProductCategory(name);
-      setProducts([...products, product]);
+      setProducts((prev) => [product, ...prev]);
       toast.success("تم إضافة المنتج بنجاح");
       setName("");
       setNameError("");

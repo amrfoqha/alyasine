@@ -63,12 +63,12 @@ const StockInPage = () => {
           إضافة شحنة جديدة
         </button>
       </Box>
-      <div className="flex flex-col justify-start bg-white px-8 pt-8 mx-8 rounded-2xl shadow-xl border border-gray-100 mb-6 w- gap-4 items-center mt-2">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6 flex gap-4 items-center w-full"
-        >
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col justify-start bg-white px-8 pt-8 mx-8 rounded-2xl shadow-xl border border-gray-100 mb-6 w- gap-4 items-center mt-2"
+      >
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 mb-6 flex gap-4 items-center w-full">
           <SearchBox onChange={handleSearch} />
           <Chip
             icon={<FilterListIcon />}
@@ -78,7 +78,7 @@ const StockInPage = () => {
             variant="outlined"
             sx={{ maxWidth: 400, px: 2, py: 1, fontSize: "1rem" }}
           />
-        </motion.div>
+        </div>
 
         <StockInTable stockIn={stockIn} />
         <div className="flex justify-center ">
@@ -88,7 +88,7 @@ const StockInPage = () => {
             totalPages={totalPages}
           />
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

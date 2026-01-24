@@ -105,6 +105,8 @@ const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
         category: productCategory._id,
       };
 
+      console.log(product);
+
       const res = await createProduct(product);
       setProducts((prev) => [...prev, res]);
       setOpen(false);
@@ -278,17 +280,41 @@ const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
                 />
               </Box>
             </Box>
-            <div className="overflow-y-scroll h-52">
-              {attributes.map((attr, i) => (
-                <Box key={i} display="flex" gap={2} mt={2}>
-                  {" "}
-                  <InputComponent value={attr.name} disabled />{" "}
-                  <InputComponent value={attr.value} disabled />{" "}
-                  <button type="button" onClick={() => removeAttribute(i)}>
-                    ❌
-                  </button>{" "}
-                </Box>
-              ))}
+            {/* change this method of display into table . now improve it UI/UX*/}
+            <div className="overflow-y-auto w-full h-52">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-100 ">
+                  <tr>
+                    <th className="p-4 text-gray-600 font-bold">الخاصية</th>
+                    <th className="p-4 text-gray-600 font-bold">القيمة</th>
+                    <th className="p-4 text-gray-600 font-bold">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {attributes.map((attr, i) => (
+                    <tr
+                      key={i}
+                      className="hover:bg-blue-50/30 transition-colors duration-200 text-center"
+                    >
+                      <td className="  font-medium text-gray-800 p-4">
+                        {attr.name}
+                      </td>
+                      <td className=" font-medium text-gray-800 p-4">
+                        {attr.value}
+                      </td>
+                      <td className=" font-medium text-gray-800 p-4">
+                        <button
+                          type="button"
+                          onClick={() => removeAttribute(i)}
+                          className="cursor-pointer"
+                        >
+                          ❌
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </Box>
         </DialogContent>
