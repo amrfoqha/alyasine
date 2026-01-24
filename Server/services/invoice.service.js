@@ -4,6 +4,7 @@ const Customer = require("../models/customer.model");
 const StockIn = require("../models/stockIn.model");
 const Counter = require("../models/counter.model");
 const { stockOut } = require("./stock.service");
+const { generateCode } = require("../utils/generateCode");
 
 exports.createInvoice = async (data) => {
   const session = await mongoose.startSession();

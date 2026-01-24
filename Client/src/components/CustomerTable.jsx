@@ -54,7 +54,7 @@ const CustomerTable = ({ customers, setCustomers }) => {
                 <td className="p-4">
                   <div className="font-bold text-gray-800">{cust?.name}</div>
                   <div className="text-xs text-gray-500 italic">
-                    كود العميل: #{cust._id}
+                    كود العميل: {cust.code}
                   </div>
                 </td>
                 <td className="p-4 text-blue-600 font-medium font-sans">

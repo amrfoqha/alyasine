@@ -1,7 +1,8 @@
-const Invoice = require("./models/invoices.model");
+const Product = require("./models/products.model");
 const { generateCode } = require("./utils/generateCode");
 // src/server.js
 const app = require("./app.js");
+const customerModel = require("./models/customer.model.js");
 require("dotenv").config();
 
 require("./config/mongoose.config");
@@ -13,24 +14,24 @@ app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
 
-// const updateInvoices = async () => {
+// const updateCustomers = async () => {
 //   try {
-//     const invoices = await Invoice.find();
+//     const customers = await customerModel.find();
 
-//     for (const inv of invoices) {
-//       const invoiceCode = await generateCode("invoice", "INV");
-//       const updatedInvoice = await Invoice.findByIdAndUpdate(
-//         inv._id,
-//         { code: invoiceCode }, // هنا تحدد الحقل اللي بدك تحدثه
+//     for (const cust of customers) {
+//       const customerCode = await generateCode("customer", "CUS");
+//       const updatedCustomer = await customerModel.findByIdAndUpdate(
+//         cust._id,
+//         { code: customerCode }, // هنا تحدد الحقل اللي بدك تحدثه
 //         { new: true }, // يرجعلك النسخة المحدثة
 //       );
 
-//       console.log(updatedInvoice);
+//       console.log(updatedCustomer);
 //     }
 
-//     console.log("تم تحديث جميع الفواتير");
+//     console.log("all the customers have been updated successfully");
 //   } catch (error) {
 //     console.error(error);
 //   }
 // };
-// updateInvoices();
+// updateCustomers();

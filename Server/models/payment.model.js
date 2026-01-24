@@ -2,17 +2,21 @@ const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema(
   {
+    code: {
+      type: String,
+      required: true,
+    },
     customer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
     },
 
-    invoice: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Invoice",
-      default: null,
-    },
+    // invoice: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Invoice",
+    //   default: null,
+    // },
 
     amount: {
       type: Number,
@@ -35,10 +39,14 @@ const paymentSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Payment", paymentSchema);

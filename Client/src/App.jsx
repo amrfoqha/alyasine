@@ -17,6 +17,7 @@ import LoadingOverlay from "./components/LoadingOverlay";
 import InvoicePage from "./pages/InvoicePage";
 import InvoiceDetails from "./pages/InvoiceDetails";
 import InvoiceRoutes from "./Routes/InvoiceRoutes";
+import PaymentsPage from "./pages/PaymentsPage";
 function App() {
   const { loading } = useContext(Auth);
   if (loading) {
@@ -45,6 +46,7 @@ function App() {
             <Route index element={<InvoicePage />} />
             <Route path=":id" element={<InvoiceDetails />} />
           </Route>
+          <Route path="payments" element={<PaymentsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

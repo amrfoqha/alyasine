@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 module.exports.protect = (req, res, next) => {
-  console.log(req.headers);
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -12,7 +11,6 @@ module.exports.protect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log(decoded);
     req.user = decoded; // يحتوي على id + role
     next();
   } catch (error) {

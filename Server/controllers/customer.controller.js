@@ -1,4 +1,5 @@
 const Customer = require("../models/customer.model");
+const { generateCode } = require("../utils/generateCode");
 module.exports.findCustomer = async (req, res) => {
   try {
     const customer = await Customer.findById(req.params.id);
@@ -48,8 +49,11 @@ module.exports.createCustomer = async (req, res) => {
     if (cust) {
       return res.status(400).json({ message: "العميل موجود بالفعل" });
     }
-
-    const customer = await Customer.create(req.body);
+    const customerCode = await generateCode("customer", "CUS");
+    const customer = await Customer.create({
+      ...req.body,
+      code: customerCode,
+    });
     res.json(customer);
   } catch (error) {
     console.error("Create Customer Error:", error);

@@ -20,7 +20,7 @@ const RecentActivityTable = ({ data = [] }) => {
           {data.length > 0 ? (
             data.map((item) => (
               <tr
-                key={item._id || Math.random()}
+                key={item._id}
                 className="hover:bg-gray-50 transition-colors group"
               >
                 <td className="p-4">

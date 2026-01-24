@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Paper, Typography, Box } from "@mui/material";
 import { motion } from "framer-motion";
 
@@ -9,6 +9,7 @@ const DashboardCard = ({
   color = "primary",
   children,
   className,
+  symbol = "",
 }) => {
   return (
     <motion.div
@@ -53,12 +54,40 @@ const DashboardCard = ({
           </Box>
         </Box>
         <Typography variant="h4" fontWeight={800} sx={{ mb: 1 }}>
-          {value}
+          {symbol}
+          {Number(value) < 1 ? (
+            Number(value)
+          ) : (
+            <AnimatedNumber targetValue={Number(value)} />
+          )}
         </Typography>
         {children && <Box sx={{ mt: 1 }}>{children}</Box>}
       </Paper>
     </motion.div>
   );
 };
+const AnimatedNumber = ({ targetValue }) => {
+  const [displayValue, setDisplayValue] = useState(0);
 
+  useEffect(() => {
+    let start = 0;
+    const end = parseInt(targetValue);
+    if (start === end) return;
+
+    let totalMiliseconds = 2000; // مدة الأنيميشن
+    let timer = setInterval(() => {
+      start += Math.ceil(end / 50); // سرعة القفزة
+      if (start >= end) {
+        setDisplayValue(end);
+        clearInterval(timer);
+      } else {
+        setDisplayValue(start);
+      }
+    }, 30);
+
+    return () => clearInterval(timer);
+  }, [targetValue]);
+
+  return <>{displayValue.toLocaleString()}</>;
+};
 export default DashboardCard;

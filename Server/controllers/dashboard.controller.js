@@ -3,6 +3,7 @@ const productCategoryModel = require("../models/productCategories.model");
 const customerModel = require("../models/customer.model");
 const stockInModel = require("../models/stockIn.model");
 const invoiceModel = require("../models/invoices.model");
+const paymentModel = require("../models/payment.model");
 
 exports.getDashboardData = async (req, res) => {
   try {
@@ -32,8 +33,14 @@ exports.getDashboardData = async (req, res) => {
       { $match: { paidAmount: { $gt: 0 } } },
       { $group: { _id: null, received: { $sum: "$paidAmount" } } },
     ]);
-    // const stockInCount = await stockInModel.countDocuments();
-    // const stockOutCount = await stockOutModel.countDocuments();
+    const totalPayments = await paymentModel.aggregate([
+      { $match: { amount: { $gt: 0 } } },
+      { $group: { _id: null, payments: { $sum: "$amount" } } },
+    ]);
+    const countOutOfStock = await productModel.aggregate([
+      { $match: { quantity: { $lt: 1 } } },
+      { $group: { _id: null, outOfStock: { $sum: 1 } } },
+    ]);
 
     res.json({
       productsCount,
@@ -44,8 +51,11 @@ exports.getDashboardData = async (req, res) => {
       totalMovements,
       totalDepts: totalDepts[0]?.Depts || 0,
       totalReceived: totalReceived[0]?.received || 0,
+      totalPayments: totalPayments[0]?.payments || 0,
+      countOutOfStock: countOutOfStock[0]?.outOfStock || 0,
     });
   } catch (err) {
+    console.error("Get Dashboard Data Error:", err);
     res.status(500).json({ message: err.message });
   }
 };

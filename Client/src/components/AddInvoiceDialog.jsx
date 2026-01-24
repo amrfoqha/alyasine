@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Box,
@@ -17,13 +16,24 @@ import {
   Divider,
   Grid,
   Card,
+  Fade,
+  Stack,
+  Chip,
+  Zoom,
 } from "@mui/material";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
-import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 
-// مكوناتك المخصصة
+// Icons
+import ReceiptLongRoundedIcon from "@mui/icons-material/ReceiptLongRounded";
+import DeleteSweepRoundedIcon from "@mui/icons-material/DeleteSweepRounded";
+import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import ShoppingBagRoundedIcon from "@mui/icons-material/ShoppingBagRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
+
+// Components
 import InputComponent from "./InputComponent";
 import ButtonComponent from "./ButtonComponent";
 import SelectComponent from "./SelectComponent";
@@ -38,50 +48,44 @@ const AddInvoiceDialog = ({
   setInvoicesCount,
 }) => {
   const [customer, setCustomer] = useState(null);
-  const [paymentType, setPaymentType] = useState("cash");
-  const [paidAmount, setPaidAmount] = useState(0);
+  const [paymentType, setPaymentType] = useState({
+    _id: "cash",
+    name: "نقداً (Cash)",
+  });
+  const [paidAmount, setPaidAmount] = useState("");
   const [products, setProducts] = useState([]);
-
-  // الأصناف
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
-  const [status, setStatus] = useState("آجل (غير مدفوع)");
 
-  // الحسابات المالية
+  // حسابات متقدمة
   const total = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items],
   );
-  const remainingAmount = total - (Number(paidAmount) || 0);
-
-  const getStatusColor = () => {
-    if (paidAmount === 0) return "#f44336"; // أحمر
-    if (paidAmount < total) return "#ff9800"; // برتقالي
-    return "#4caf50"; // أخضر
-  };
+  const remainingAmount = Math.max(0, total - (Number(paidAmount) || 0));
+  const isOverPaid = (Number(paidAmount) || 0) > total;
 
   const addItem = () => {
     if (!selectedProduct || !quantity || quantity <= 0)
-      return toast.error("أكمل بيانات الصنف بشكل صحيح");
+      return toast.error("يرجى تحديد المنتج والكمية");
     if (quantity > selectedProduct.quantity)
-      return toast.error(`عذراً، المتوفر فقط ${selectedProduct.quantity}`);
-
-    const isExist = items.find((i) => i.product._id === selectedProduct._id);
-    if (isExist)
-      return toast.error("هذا المنتج مضاف بالفعل، قم بتعديله أو حذفه");
+      return toast.error("الكمية المطلوبة تتجاوز المخزون");
 
     const newItem = {
       product: selectedProduct,
       price: selectedProduct.sellPrice,
       quantity: Number(quantity),
+      tempId: Date.now(),
     };
-    setItems([...items, newItem]);
+
+    setItems([newItem, ...items]);
     setSelectedProduct(null);
     setQuantity("");
   };
 
-  const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
+  const removeItem = (tempId) =>
+    setItems(items.filter((item) => item.tempId !== tempId));
 
   const handleClose = () => {
     setOpen(false);
@@ -90,23 +94,30 @@ const AddInvoiceDialog = ({
     setCustomer(null);
     setSelectedProduct(null);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!customer) return toast.error("يجب اختيار العميل");
+
     if (items.length === 0) return toast.error("الفاتورة لا تحتوي على أصناف");
 
     try {
       const payload = {
         customer: customer._id,
+
         items: items.map((i) => ({
           product: i.product._id,
+
           quantity: i.quantity,
+
           price: i.price,
         })),
+
         paidAmount: Number(paidAmount),
+
         paymentType: paymentType._id,
       };
+
       console.log(payload);
       const res = await createInvoice(payload);
       console.log(res);
@@ -116,37 +127,17 @@ const AddInvoiceDialog = ({
       handleClose();
     } catch (error) {
       console.log(error);
+
       toast.error(error.response?.data?.message || "خطأ في السيرفر");
     }
   };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const data = await getProducts();
-        // تأكد هنا: هل البيانات هي المصفوفة أم موجودة داخل data.products؟
-        setProducts(data);
-      } catch (err) {
-        console.error("خطأ في جلب المنتجات:", err);
-        toast.error("فشل تحميل قائمة المنتجات");
-      }
-    };
-
-    if (open) {
-      fetchProducts();
-    }
+    if (open)
+      getProducts()
+        .then(setProducts)
+        .catch(() => toast.error("خطأ في جلب الأصناف"));
   }, [open]);
-  useEffect(() => {
-    if (total > 0) {
-      setStatus(
-        Number(paidAmount) === Number(total)
-          ? "بالكامل مدفوع"
-          : Number(paidAmount) < Number(total) && Number(paidAmount) > 0
-            ? "مدفوع جزئياً"
-            : "آجل (غير مدفوع)",
-      );
-    }
-  }, [paidAmount, total]);
 
   return (
     <Dialog
@@ -154,277 +145,333 @@ const AddInvoiceDialog = ({
       onClose={handleClose}
       fullWidth
       maxWidth="lg"
-      scroll="paper"
+      TransitionComponent={Fade}
+      PaperProps={{
+        sx: {
+          borderRadius: "2.8rem",
+          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
+        },
+      }}
     >
-      <DialogTitle
-        component="div"
-        sx={{
-          bgcolor: "#1a237e",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
-        }}
-      >
-        <InventoryIcon />
-        <Typography variant="h6" fontWeight="bold">
-          نظام الفواتير - إصدار فاتورة بيع
-        </Typography>
-      </DialogTitle>
+      {/* Header - Dark Mode Aesthetic */}
+      <Box className="flex justify-end items-center w-full text-white p-4 bg-[#0f172a] relative">
+        <Stack direction="row" className=" items-center gap-2" dir="rtl">
+          <div className="p-3 bg-blue-500/20 rounded-2xl border border-blue-500/30">
+            <ReceiptLongRoundedIcon sx={{ fontSize: 35, color: "#3b82f6" }} />
+          </div>
+          <div>
+            <Typography variant="h5" fontWeight="900">
+              إنشاء فاتورة بيع
+            </Typography>
+          </div>
+        </Stack>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            position: "absolute",
+            top: 20,
+            left: 20,
+            color: "rgba(255,255,255,0.3)",
+          }}
+          hover={{
+            color: "rgba(255,255,255,0.7)",
+          }}
+        >
+          <CloseRoundedIcon
+            sx={{ fontSize: 35 }}
+            className="hover:text-white ease-in-out duration-300 transition-colors"
+          />
+        </IconButton>
+      </Box>
 
-      <Box component="form" onSubmit={handleSubmit} dir="rtl">
-        <DialogContent sx={{ p: 4 }}>
-          {/* القسم الأول: بيانات العميل والدفع */}
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={4}>
-              <SelectComponent
-                label="العميل"
-                options={customers}
-                value={customer?._id}
-                onChange={setCustomer}
-                optionLabel="name"
-                placeholder="اختر العميل..."
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <SelectComponent
-                label="طريقة الدفع"
-                options={[
-                  { _id: "cash", name: "نقداً (Cash)" },
-                  { _id: "bank", name: "تحويل بنكي" },
-                  { _id: "check", name: "شيك" },
-                ]}
-                value={paymentType?._id}
-                onChange={setPaymentType}
-                optionLabel="name"
-              />
-            </Grid>
-            <Grid item xs={12} md={2}>
-              <InputComponent
-                label="المبلغ المدفوع"
-                type="number"
-                value={paidAmount}
-                onChange={(e) => setPaidAmount(e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12} md={3}>
-              <Card
-                variant="outlined"
+      <DialogContent sx={{ p: 0, bgcolor: "#fcfcfc" }} dir="rtl">
+        <Grid container sx={{ minHeight: "70vh" }}>
+          {/* الجانب الأيمن: المدخلات */}
+          <Grid
+            item
+            xs={12}
+            lg={8}
+            sx={{ p: 5, borderLeft: "1px solid #f1f5f9" }}
+          >
+            <Stack spacing={4}>
+              {/* بيانات العميل */}
+              <Box>
+                <Typography
+                  variant="subtitle2"
+                  fontWeight="900"
+                  sx={{ mb: 2, color: "#475569" }}
+                >
+                  البيانات الأساسية
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={7}>
+                    <SelectComponent
+                      label="العميل المشتري"
+                      options={customers}
+                      value={customer?._id}
+                      onChange={setCustomer}
+                      optionLabel="name"
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={5}>
+                    <SelectComponent
+                      label="وسيلة الدفع"
+                      options={[
+                        { _id: "cash", name: "كاش" },
+                        { _id: "bank", name: "حوالة" },
+                      ]}
+                      value={paymentType?._id}
+                      onChange={setPaymentType}
+                      optionLabel="name"
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+
+              <Divider />
+
+              {/* اختيار الأصناف */}
+              <Box
                 sx={{
-                  p: 1,
-                  textAlign: "center",
-                  borderColor: getStatusColor(),
-                  borderWidth: 2,
+                  bgcolor: "#f8fafc",
+                  p: 3,
+                  borderRadius: "2rem",
+                  border: "1px dashed #cbd5e1",
                 }}
               >
-                <Typography variant="caption" display="block">
-                  حالة السداد
-                </Typography>
-                <Typography
-                  variant="h6"
-                  sx={{ color: getStatusColor(), fontWeight: "bold" }}
-                >
-                  {status}
-                </Typography>
-              </Card>
-            </Grid>
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} md={6}>
+                    <SelectComponent
+                      label="البحث عن صنف في المخزن"
+                      options={products}
+                      value={selectedProduct?._id}
+                      onChange={setSelectedProduct}
+                      optionLabel="name"
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={3}>
+                    <InputComponent
+                      label="الكمية"
+                      type="number"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={3}>
+                    <ButtonComponent
+                      label="إضافة"
+                      onClick={addItem}
+                      icon={<AddShoppingCartRoundedIcon />}
+                      className="w-full py-4"
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* تفاصيل سريعة للمنتج المختار */}
+                <AnimatePresence>
+                  {selectedProduct && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <Stack direction="row" spacing={2} sx={{ mt: 2 }} gap={2}>
+                        <Chip
+                          icon={<InfoOutlinedIcon />}
+                          label={`سعر البيع: ${selectedProduct.sellPrice} ₪`}
+                          sx={{ fontWeight: "bold", px: 2 }}
+                        />
+                        <Chip
+                          icon={<ErrorOutlineRoundedIcon />}
+                          label={`مخزون متاح: ${selectedProduct.quantity}`}
+                          color={
+                            selectedProduct.quantity < 5 ? "error" : "default"
+                          }
+                          sx={{ fontWeight: "bold", px: 2 }}
+                        />
+                      </Stack>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Box>
+
+              {/* جدول الأصناف المضافة */}
+              <TableContainer
+                component={Paper}
+                elevation={0}
+                sx={{ borderRadius: "1.5rem", border: "1px solid #e2e8f0" }}
+              >
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow
+                      sx={{ "& th": { bgcolor: "#f1f5f9", fontWeight: "900" } }}
+                    >
+                      <TableCell>الصنف</TableCell>
+                      <TableCell align="center">الكمية</TableCell>
+                      <TableCell align="center">السعر</TableCell>
+                      <TableCell align="center">الإجمالي</TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    <AnimatePresence initial={false}>
+                      {items.map((item) => (
+                        <TableRow
+                          key={item.tempId}
+                          component={motion.tr}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0, x: -20 }}
+                        >
+                          <TableCell sx={{ fontWeight: "bold" }}>
+                            {item.product.name}
+                          </TableCell>
+                          <TableCell align="center">
+                            {item.quantity} {item.product.unit}
+                          </TableCell>
+                          <TableCell align="center">{item.price} ₪</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: "900" }}>
+                            {item.price * item.quantity} ₪
+                          </TableCell>
+                          <TableCell align="center">
+                            <IconButton
+                              onClick={() => removeItem(item.tempId)}
+                              size="small"
+                              sx={{ color: "#ef4444", bgcolor: "#fef2f2" }}
+                            >
+                              <DeleteSweepRoundedIcon fontSize="small" />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </AnimatePresence>
+                    {items.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          align="center"
+                          sx={{ py: 10, color: "#94a3b8" }}
+                        >
+                          <ShoppingBagRoundedIcon
+                            sx={{ fontSize: 50, mb: 2, opacity: 0.1 }}
+                          />
+                          <Typography variant="body2">
+                            قائمة الفاتورة فارغة حالياً
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Stack>
           </Grid>
 
-          <Divider sx={{ mb: 3 }}>إضافة منتجات للفاتورة</Divider>
+          {/* الجانب الأيسر: ملخص الدفع (Checkout Style) */}
+          <Grid item xs={12} lg={4} sx={{ bgcolor: "#f8fafc", p: 5 }}>
+            <Box sx={{ position: "sticky", top: 40 }}>
+              <Typography variant="h6" fontWeight="900" sx={{ mb: 4 }}>
+                ملخص العملية
+              </Typography>
 
-          {/* القسم الثاني: شريط إضافة الأصناف */}
-          <Box sx={{ p: 2, bgcolor: "#f9f9f9", borderRadius: 2, mb: 3 }}>
-            <Grid
-              container
-              spacing={2}
-              alignItems="center"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4 justify-between"
-            >
-              <Grid item xs={12} md={4}>
-                <SelectComponent
-                  label="البحث عن منتج"
-                  options={products}
-                  value={selectedProduct?._id}
-                  onChange={setSelectedProduct}
-                  optionLabel="name"
-                />
-              </Grid>
-              <Grid item xs={12} md={4} className="flex">
-                <label
-                  htmlFor="sellPrice"
-                  className="flex items-center text-lg font-bold"
+              <Stack spacing={3}>
+                <div className="flex justify-between items-center text-slate-500">
+                  <span>إجمالي السلع</span>
+                  <span className="font-bold">{total.toLocaleString()} ₪</span>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400">
+                    تأكيد المبلغ المستلم
+                  </label>
+                  <InputComponent
+                    placeholder="0.00"
+                    type="number"
+                    value={paidAmount}
+                    onChange={(e) => setPaidAmount(e.target.value)}
+                    className="bg-white!"
+                  />
+                </div>
+
+                <Divider />
+
+                <Box
+                  sx={{
+                    p: 3,
+                    borderRadius: "2rem",
+                    bgcolor: isOverPaid ? "#fef2f2" : "#1e293b",
+                    color: isOverPaid ? "#ef4444" : "white",
+                    transition: "all 0.3s ease",
+                  }}
                 >
-                  سعر
-                  <span className="text-gray-500 text-sm">
-                    {" "}
-                    ({selectedProduct?.unit})
-                  </span>
-                </label>
-                <InputComponent
-                  value={selectedProduct?.sellPrice || ""}
-                  disabled
-                  name={"sellPrice"}
-                  className={"max-w-24"}
-                />
-              </Grid>
-              <Grid item xs={12} md={4} className="flex ">
-                <label
-                  htmlFor="quantity"
-                  className="flex items-center text-lg font-bold"
+                  <Stack spacing={2}>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm opacity-70">المبلغ المتبقي</span>
+                      <Typography variant="h4" fontWeight="900">
+                        {remainingAmount.toLocaleString()} ₪
+                      </Typography>
+                    </div>
+                    {isOverPaid && (
+                      <Typography
+                        variant="caption"
+                        className="flex items-center gap-1"
+                      >
+                        <ErrorOutlineRoundedIcon sx={{ fontSize: 14 }} /> المبلغ
+                        المدفوع أكبر من الإجمالي
+                      </Typography>
+                    )}
+                  </Stack>
+                </Box>
+
+                <Card
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "1.5rem",
+                    p: 2,
+                    borderStyle: "dashed",
+                    bgcolor: "white",
+                  }}
                 >
-                  الكمية
-                  <span className="text-gray-500 text-sm">
-                    {" "}
-                    ({selectedProduct?.unit})
-                  </span>
-                </label>
-                <InputComponent
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className={"max-w-24"}
-                  name={"quantity"}
-                />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="caption">الإجمالي الفرعي</Typography>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {(
-                    (selectedProduct?.sellPrice || 0) * (Number(quantity) || 0)
-                  ).toLocaleString()}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="caption">المخزون</Typography>
-                <Typography variant="subtitle1" fontWeight="bold">
-                  {selectedProduct?.quantity || 0}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <ButtonComponent
-                  label="أضف للجدول"
-                  type="button"
-                  onClick={addItem}
-                  className="bg-indigo-600 w-full"
-                  icon={<AddShoppingCartIcon />}
-                  disabled={
-                    selectedProduct?.quantity < Number(quantity) ||
-                    !selectedProduct ||
-                    !quantity ||
-                    !Number(quantity) ||
-                    !selectedProduct?.sellPrice
-                  }
-                />
-              </Grid>
-            </Grid>
-          </Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    display="block"
+                    gutterBottom
+                  >
+                    حالة السداد
+                  </Typography>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-3 h-3 rounded-full ${remainingAmount === 0 && total > 0 ? "bg-green-500" : "bg-amber-500 animate-pulse"}`}
+                    />
+                    <span className="font-black text-slate-700">
+                      {remainingAmount === 0 && total > 0
+                        ? "مدفوعة بالكامل"
+                        : "يوجد مبالغ مستحقة"}
+                    </span>
+                  </div>
+                </Card>
+              </Stack>
+            </Box>
+          </Grid>
+        </Grid>
+      </DialogContent>
 
-          <TableContainer
-            component={Paper}
-            variant="outlined"
-            sx={{ mb: 3, maxHeight: 400 }}
-          >
-            <Table stickyHeader>
-              <TableBody>
-                <TableRow
-                  sx={{ "& th": { bgcolor: "#a8a8a8", fontWeight: "bold" } }}
-                >
-                  <TableCell align="right">#</TableCell>
-                  <TableCell align="right">اسم المنتج</TableCell>
-                  <TableCell align="center">السعر</TableCell>
-                  <TableCell align="center">الكمية</TableCell>
-                  <TableCell align="center">الإجمالي</TableCell>
-                  <TableCell align="center">إجراء</TableCell>
-                </TableRow>
-              </TableBody>
-              <TableBody>
-                {items.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      align="center"
-                      sx={{ py: 3, color: "gray" }}
-                    >
-                      لا توجد أصناف مضافة بعد
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  items.map((item, i) => (
-                    <TableRow key={i} hover>
-                      <TableCell align="right">{i + 1}</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 500 }}>
-                        {item.product.name}
-                      </TableCell>
-                      <TableCell align="center">
-                        {item.price.toLocaleString()}
-                      </TableCell>
-
-                      <TableCell align="center">
-                        {item.product.unit} {item.quantity}
-                      </TableCell>
-                      <TableCell align="center">
-                        {(item.price * item.quantity).toLocaleString()}
-                      </TableCell>
-                      <TableCell align="center">
-                        <IconButton
-                          color="error"
-                          onClick={() => removeItem(i)}
-                          size="small"
-                        >
-                          <DeleteSweepIcon />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-            <Card
-              sx={{ p: 3, bgcolor: "#1a237e", color: "white", minWidth: 300 }}
-            >
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-              >
-                <Typography>إجمالي الفاتورة:</Typography>
-                <Typography variant="h6">{total.toLocaleString()}</Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderTop: "1px solid #ffffff33",
-                  pt: 1,
-                }}
-              >
-                <Typography>المتبقي (ديون):</Typography>
-                <Typography
-                  variant="h6"
-                  color={remainingAmount > 0 ? "#ffccbc" : "inherit"}
-                >
-                  {remainingAmount.toLocaleString()}
-                </Typography>
-              </Box>
-            </Card>
-          </Box>
-        </DialogContent>
-
-        <DialogActions sx={{ p: 3, bgcolor: "#f8f9fa" }}>
-          <ButtonComponent
-            type="button"
-            label="إلغاء العملية"
-            onClick={handleClose}
-          />
-          <ButtonComponent
-            label="حفظ وطباعة الفاتورة"
-            type="submit"
-            className="bg-indigo-900 px-8"
-            disabled={items.length === 0 || !customer}
-          />
-        </DialogActions>
-      </Box>
+      <DialogActions
+        sx={{ p: 2, bgcolor: "white", borderTop: "1px solid #f1f5f9" }}
+      >
+        <ButtonComponent
+          label="إغلاق"
+          onClick={handleClose}
+          className="bg-slate-100! text-slate-500! shadow-none hover:bg-slate-200 "
+        />
+        <ButtonComponent
+          label="حفظ وطباعة الفاتورة"
+          disabled={items.length === 0 || !customer}
+          className="flex-1 py-4 bg-blue-600! hover:bg-blue-700! shadow-xl shadow-blue-200 h-full"
+          onClick={handleSubmit}
+        />
+      </DialogActions>
     </Dialog>
   );
 };

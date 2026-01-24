@@ -66,7 +66,7 @@ const InvoiceTable = ({ invoices, setInvoices }) => {
               </td>
               <td className="p-4">
                 <span className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm">
-                  ${inv.remainingAmount || inv.total}
+                  ${inv.remainingAmount}
                 </span>
               </td>
               <td className="p-4 ">

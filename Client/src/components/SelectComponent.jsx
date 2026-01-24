@@ -30,7 +30,7 @@ const SelectComponent = ({
           value={selectedOption}
           getOptionLabel={(option) => option[optionLabel]}
           getOptionValue={(option) => option[optionValue]}
-          onChange={onChange}
+          onChange={(e) => onChange(e)}
           isClearable
           isSearchable
           placeholder={placeholder}

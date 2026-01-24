@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { getProductCategoryById } from "../API/ProductCategoryAPI";
 import BackButton from "../components/BackButton";
@@ -8,11 +8,13 @@ import { getAllProductsByCategoryByPage } from "../API/ProductAPI";
 import UsePagination from "../context/UsePagination";
 import { motion } from "framer-motion";
 import AddProductDialog from "../components/AddProductDialog";
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Box, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchBox from "../components/SearchBox";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import CategoryIcon from "@mui/icons-material/Category";
+
 const ProductsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -21,14 +23,15 @@ const ProductsPage = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [open, setOpen] = useState(false);
-  const limit = 5;
   const [search, setSearch] = useState("");
+  const limit = 5;
+
   useEffect(() => {
     const fetchProductCategoryById = async () => {
       try {
-        const productCategory = await getProductCategoryById(id);
+        const categoryData = await getProductCategoryById(id);
+        setProductCategory(categoryData);
 
-        setProductCategory(productCategory);
         const res = await getAllProductsByCategoryByPage(
           id,
           page,
@@ -40,94 +43,100 @@ const ProductsPage = () => {
         setTotalPages(res.pagination.totalPages);
       } catch (error) {
         toast.error("حدث خطأ أثناء جلب المنتجات");
-        navigate("/*");
-        console.log(error);
+        navigate("/inventory");
       }
     };
     fetchProductCategoryById();
-  }, [id, page, search]);
+  }, [id, page, search, navigate]);
 
   const handleSearch = (e) => {
-    const searchValue = e.target.value.toLowerCase();
-    setSearch(searchValue);
+    setSearch(e.target.value.toLowerCase());
     setPage(1);
   };
+
   return (
-    <div className="flex flex-col gap-4  mx-auto  w-full">
-      <Header title="المنتجات" />
+    <div className="bg-[#f8fafc] min-h-screen w-full pb-10 font-sans" dir="rtl">
+      <Header title="تصفح المنتجات" />
+
+      {/* منطقة العرض العلوية (Hero Section) */}
       <motion.main
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.75 }}
-        className="flex flex-row-reverse gap-4 items-center mx-auto  w-full"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-7xl mx-auto px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-6"
       >
-        <div className="flex flex-row-reverse gap-10 justify-center mx-auto  w-full">
-          <h1 className="text-center text-2xl py-4">
-            <span className="text-red-600 text-3xl"> الفئة: </span>
-            <span className="text-gray-600 underline underline-offset-6">
-              {productCategory.name}
-            </span>
-          </h1>
-          <h1 className="text-center text-2xl py-4">
-            <span className="text-red-600 text-3xl"> تاريخ الإضافة: </span>
-            <span className="text-gray-600 underline underline-offset-6">
-              {productCategory.createdAt?.split("T")[0]}
-            </span>
-          </h1>
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          <Box className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
+            <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
+              <CategoryIcon fontSize="medium" />
+            </div>
+            <div>
+              <Typography
+                variant="caption"
+                className="text-gray-400 font-bold block"
+              >
+                الفئة المختارة
+              </Typography>
+              <Typography variant="h6" className="font-black text-gray-800">
+                {productCategory.name}
+              </Typography>
+            </div>
+          </Box>
+
+          <Box className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
+            <div className="bg-emerald-50 p-3 rounded-2xl text-emerald-600">
+              <CalendarMonthIcon fontSize="medium" />
+            </div>
+            <div>
+              <Typography
+                variant="caption"
+                className="text-gray-400 font-bold block"
+              >
+                تاريخ الإنشاء
+              </Typography>
+              <Typography
+                variant="h6"
+                className="font-bold text-gray-800 font-mono"
+              >
+                {productCategory.createdAt?.split("T")[0]}
+              </Typography>
+            </div>
+          </Box>
         </div>
-        <div className=" pl-10">
+
+        <div className="hover:scale-105 transition-transform">
           <BackButton />
         </div>
       </motion.main>
-      <motion.section
-        initial={{ opacity: 0, x: 40 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.75 }}
-      >
-        {/* <AddProductForm
-          productCategory={productCategory}
-          setProducts={setProducts}
-        /> */}
-        <AddProductDialog
-          open={open}
-          setOpen={setOpen}
-          onAdd={() => setOpen(false)}
-          productCategory={productCategory}
-          setProducts={setProducts}
-        />
-      </motion.section>
 
-      <section className="w-full px-8 ">
+      {/* شريط الأدوات الذكي (Toolbar) */}
+      <section className="max-w-7xl mx-auto px-8 mb-8">
         <Stack
-          direction="row"
+          direction={{ xs: "column", md: "row" }}
           spacing={2}
           alignItems="center"
           justifyContent="space-between"
-          sx={{
-            mb: 3,
-            p: 2,
-            backgroundColor: "#ffffff",
-            boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-
-            borderRadius: "15px",
-            px: 8,
-          }}
+          className="bg-white p-4 rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-50"
         >
-          {/* خانة البحث */}
-          <SearchBox onChange={handleSearch} />
+          <div className="w-full md:w-1/2">
+            <SearchBox
+              onChange={handleSearch}
+              placeholder="بحث سريع في هذه الفئة..."
+            />
+          </div>
 
-          {/* زر فتح الـ Dialog */}
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setOpen(true)}
             sx={{
-              background: "linear-gradient(135deg, #1E2939, #193CB8)",
-              px: 3,
-              py: 1,
-              borderRadius: "10px",
-              fontSize: "16px",
-              color: "white",
+              background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+              px: 4,
+              py: 1.5,
+              borderRadius: "18px",
+              fontWeight: "bold",
+              textTransform: "none",
+              boxShadow: "0 10px 15px -3px rgba(30, 41, 59, 0.3)",
+              "&:hover": { background: "#0f172a" },
             }}
           >
             إضافة منتج جديد
@@ -135,23 +144,43 @@ const ProductsPage = () => {
         </Stack>
       </section>
 
-      <section className="w-full px-8">
-        {products.length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col gap-4 justify-center items-center bg-white px-8 shadow-2xl border border-gray-100 mb-6 rounded-2xl"
+      {/* جدول المنتجات */}
+      <section className="max-w-7xl mx-auto px-8">
+        {products.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden"
           >
-            <ProductsTable products={products} setProducts={setProducts} />
-            <UsePagination
-              page={page}
-              setPage={setPage}
-              totalPages={totalPages}
-            />
-          </motion.section>
+            <div className="p-2">
+              <ProductsTable products={products} setProducts={setProducts} />
+            </div>
+
+            <div className="py-8 flex justify-center border-t border-gray-50">
+              <UsePagination
+                page={page}
+                setPage={setPage}
+                totalPages={totalPages}
+              />
+            </div>
+          </motion.div>
+        ) : (
+          <div className="bg-gray-50/50 border-2 border-dashed border-gray-200 rounded-[3rem] py-20 flex flex-col items-center">
+            <span className="text-6xl mb-4 opacity-20">🛒</span>
+            <Typography className="text-gray-400 font-bold">
+              لا توجد منتجات مضافة في هذه الفئة بعد
+            </Typography>
+          </div>
         )}
       </section>
+
+      <AddProductDialog
+        open={open}
+        setOpen={setOpen}
+        onAdd={() => setOpen(false)}
+        productCategory={productCategory}
+        setProducts={setProducts}
+      />
     </div>
   );
 };
