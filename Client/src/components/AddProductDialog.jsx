@@ -98,7 +98,7 @@ const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
     try {
       const product = {
         name,
-        sellPrice,
+        sellPrice: Number(sellPrice),
         unit,
         description,
         attributes: attrObj,
@@ -276,7 +276,6 @@ const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
                     attribute.name.length < 3 ||
                     attribute.value.length < 3
                   }
-                  className="bg-green-500"
                 />
               </Box>
             </Box>

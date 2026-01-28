@@ -4,8 +4,10 @@ import DeleteButton from "./DeleteButton";
 import { deleteCustomer } from "../API/CustomerAPI";
 import { toast } from "react-hot-toast";
 import EditCustomerDialog from "./EditCustomerDialog";
+import { useNavigate } from "react-router-dom";
 
 const CustomerTable = ({ customers, setCustomers }) => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [customer, setCustomer] = useState(null);
 
@@ -80,8 +82,16 @@ const CustomerTable = ({ customers, setCustomers }) => {
                       }}
                       className="flex items-center gap-1 bg-green-50 text-green-600 px-3 py-2 rounded-lg hover:bg-green-600 hover:text-white transition-all duration-200 text-sm font-semibold shadow-sm"
                     >
-                      <Edit2 fontSize="small" />
+                      <Edit2 size={16} />
                       تعديل
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigate(`/customer/${cust._id}/statement`)
+                      }
+                      className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200 text-sm font-semibold shadow-sm"
+                    >
+                      كشف حساب
                     </button>
                     <DeleteButton handleDelete={() => handleDelete(cust._id)} />
                   </div>

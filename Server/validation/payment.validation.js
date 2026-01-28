@@ -24,6 +24,21 @@ module.exports.validatePayment = async (req, res, next) => {
     if (!["cash", "bank", "check"].includes(method))
       return res.status(400).json({ message: "Invalid payment method" });
 
+    if (method === "check") {
+      const { checkDetails } = req.body;
+      if (
+        !checkDetails ||
+        !checkDetails.checkNumber ||
+        !checkDetails.bankName ||
+        !checkDetails.dueDate
+      ) {
+        return res.status(400).json({
+          message:
+            "Check details (number, bank, due date) are required for check payments",
+        });
+      }
+    }
+
     next();
   } catch (error) {
     console.error("Payment Validation Error:", error);

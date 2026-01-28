@@ -8,6 +8,8 @@ import {
   TrendingUp,
   Receipt,
   People,
+  Money,
+  MoneyOff,
 } from "@mui/icons-material";
 import {
   Box,
@@ -27,6 +29,8 @@ import RecentActivityTable from "../components/RecentActivityTable";
 import LoadingOverlay from "../components/LoadingOverlay";
 import { getDashboardStats } from "../API/DashboardAPI";
 import { useNavigate } from "react-router-dom";
+import ChecksTable from "../components/ChecksTable";
+import { Check, Sandwich, Timer } from "lucide-react";
 
 const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
@@ -39,6 +43,9 @@ const DashboardPage = () => {
     totalMovements: 0,
     totalReceived: 0,
     totalDebt: 0,
+    AllChecks: [],
+    AllChecksCount: 0,
+    AllChecksAmount: 0,
   });
   const navigate = useNavigate();
 
@@ -57,7 +64,11 @@ const DashboardPage = () => {
           totalDebt: data.totalDepts,
           countOutOfStock: data.countOutOfStock,
           totalPayments: data.totalPayments,
+          AllChecks: data.AllChecks,
+          AllChecksCount: data.AllChecksCount,
+          AllChecksAmount: data.AllChecksAmount,
         });
+        console.log(data.AllChecksAmount, data.AllChecksCount);
       } catch (error) {
         console.error("Dashboard Fetch Error:", error);
       } finally {
@@ -82,7 +93,7 @@ const DashboardPage = () => {
     <div className="bg-[#f8fafc] min-h-screen w-full pb-10" dir="rtl">
       <Header title="مركز القيادة" />
 
-      <main className="p-4 md:p-8 max-w-7xl mx-auto mt-[-30px]">
+      <main className="p-4 md:p-8 max-w-8xl mx-auto mt-[-30px]">
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -126,7 +137,7 @@ const DashboardPage = () => {
                 title="ديون العملاء"
                 value={stats.totalDebt}
                 symbol="₪"
-                icon={<Warning sx={{ fontSize: 35 }} />}
+                icon={<MoneyOff sx={{ fontSize: 35 }} />}
                 color="red"
                 subtitle="تتطلب متابعة عاجلة"
               />
@@ -216,18 +227,73 @@ const DashboardPage = () => {
               </DashboardCard>
             </div>
           </section>
+          <section className="flex flex-col gap-8 mb-10 px-4 w-full" dir="rtl">
+            <Typography variant="h6" fontWeight="bold" className="mb-4">
+              نظرة سريعة
+            </Typography>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 w-full justify-between">
+              <DashboardCard
+                title={"عميل مسجل"}
+                value={stats.customersCount}
+                icon={
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <People />
+                  </div>
+                }
+              />
+              <DashboardCard
+                title={"صنف في المستودع"}
+                value={stats.totalProducts}
+                icon={
+                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <Inventory />
+                  </div>
+                }
+              />
+
+              <DashboardCard
+                title={"أصناف منتهية"}
+                value={stats.countOutOfStock || "0"}
+                icon={
+                  <div className="p-3 bg-red-50 text-red-600 rounded-xl">
+                    <Warning sx={{ fontSize: 40, opacity: 0.5 }} />
+                  </div>
+                }
+              />
+              <DashboardCard
+                title={"عدد الشيكات غير المحصلة"}
+                value={stats.AllChecksCount || "0"}
+                icon={
+                  <div className="p-3 bg-red-50 text-red-600 rounded-xl">
+                    {/* give me a symbol/icon for sand clock or sand watch */}
+                    <Timer sx={{ fontSize: 40, opacity: 0.5 }} />
+                  </div>
+                }
+              />
+              <DashboardCard
+                title={"إجمالي الشيكات غير المحصلة"}
+                value={stats.AllChecksAmount || "0"}
+                icon={
+                  <div className="p-3 bg-red-50 text-red-600 rounded-xl">
+                    {/* give me a symbol/icon for sand clock or sand watch */}
+                    <Money sx={{ fontSize: 40, opacity: 0.5 }} />
+                  </div>
+                }
+              />
+            </div>
+          </section>
           {/* القسم الثاني: إحصائيات المخزون والعملاء */}
-          <Grid container spacing={4} className="mb-10">
-            <Grid item xs={12} lg={8}>
-              <div className="flex items-center justify-between mb-4">
-                <Stack direction="row" spacing={1} alignItems="center">
+          <div className="flex gap-8 mb-10 px-4" dir="rtl">
+            <div className="w-full">
+              <div className="flex items-center justify-between mb-4 px-4">
+                <Stack direction="row" gap={2} alignItems="center">
                   <Inventory className="text-slate-400" />
                   <Typography variant="h6" fontWeight="bold">
                     آخر حركات المخازن
                   </Typography>
                 </Stack>
                 <Button
-                  size="small"
+                  size="large"
                   className="text-indigo-600"
                   onClick={() => navigate("/stockin")}
                 >
@@ -237,62 +303,29 @@ const DashboardPage = () => {
               <Paper className="rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                 <RecentActivityTable data={stats.stockIn} />
               </Paper>
-            </Grid>
+            </div>
 
-            <Grid item xs={12} lg={4}>
-              <Typography variant="h6" fontWeight="bold" className="mb-4">
-                نظرة سريعة
-              </Typography>
-              <Stack spacing={2}>
-                <Paper className="p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                    <People />
-                  </div>
-                  <Box>
-                    <Typography variant="h5" fontWeight="900">
-                      {stats.customersCount}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      عميل مسجل
-                    </Typography>
-                  </Box>
-                </Paper>
-
-                <Paper className="p-5 rounded-2xl border border-slate-100 flex items-center gap-4">
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <Inventory />
-                  </div>
-                  <Box>
-                    <Typography variant="h5" fontWeight="900">
-                      {stats.totalProducts}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      صنف في المستودع
-                    </Typography>
-                  </Box>
-                </Paper>
-
-                {/* بطاقة التنبيه المحدثة */}
-                <Paper className="p-5 rounded-2xl bg-linear-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-100">
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Box>
-                      <Typography variant="h6" fontWeight="bold">
-                        {stats.countOutOfStock || "0"}
-                      </Typography>
-                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                        أصناف منتهية
-                      </Typography>
-                    </Box>
-                    <Warning sx={{ fontSize: 40, opacity: 0.5 }} />
-                  </Stack>
-                </Paper>
-              </Stack>
-            </Grid>
-          </Grid>
+            <div className="w-full">
+              <div className="flex items-center justify-between mb-4 px-4">
+                <Stack direction="row" gap={2} alignItems="center">
+                  <Inventory className="text-slate-400" />
+                  <Typography variant="h6" fontWeight="bold">
+                    آثار الشيكات
+                  </Typography>
+                </Stack>
+                <Button
+                  size="large"
+                  className="text-indigo-600"
+                  onClick={() => navigate("/payments")}
+                >
+                  عرض الكل
+                </Button>
+              </div>
+              <Paper className="rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                <ChecksTable data={stats.AllChecks} />
+              </Paper>
+            </div>
+          </div>
         </motion.div>
       </main>
     </div>

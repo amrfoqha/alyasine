@@ -72,6 +72,22 @@ const invoiceSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    checkDetails: {
+      checkNumber: {
+        type: String,
+      },
+      bankName: {
+        type: String,
+      },
+      dueDate: {
+        type: Date,
+      },
+      status: {
+        type: String,
+        enum: ["pending", "cleared", "returned"],
+        default: "pending",
+      },
+    },
     isDeleted: {
       type: Boolean,
       default: false,
@@ -79,6 +95,23 @@ const invoiceSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Add validation to ensure checkDetails are present if paymentType is check
+invoiceSchema.pre("validate", async function () {
+  if (this.paymentType === "check") {
+    if (
+      !this.checkDetails ||
+      !this.checkDetails.checkNumber ||
+      !this.checkDetails.bankName ||
+      !this.checkDetails.dueDate
+    ) {
+      this.invalidate(
+        "checkDetails",
+        "Check details (number, bank, due date) are required for check payments",
+      );
+    }
+  }
+});
 
 invoiceSchema.pre("save", async function () {
   // حساب الإجمالي
@@ -100,5 +133,9 @@ invoiceSchema.pre("save", async function () {
   else if (this.paidAmount < this.total) this.status = "partial";
   else this.status = "paid";
 });
+
+invoiceSchema.index({ customer: 1, isDeleted: 1 });
+invoiceSchema.index({ "checkDetails.checkNumber": 1 });
+invoiceSchema.index({ code: 1 });
 
 module.exports = mongoose.model("Invoice", invoiceSchema);

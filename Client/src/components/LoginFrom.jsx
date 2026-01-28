@@ -14,7 +14,8 @@ const LoginFrom = ({ setShowLogin }) => {
     setName(e.target.value);
     setError({
       ...error,
-      nameError: e.target.value.length < 1 ? "الاسم يجب ان يحتوي على حرف" : "",
+      nameError:
+        e.target.value.length < 3 ? "الاسم يجب ان يكون 3 حروف على الاقل" : "",
     });
   };
   const handlePasswordChange = (e) => {
@@ -22,7 +23,9 @@ const LoginFrom = ({ setShowLogin }) => {
     setError({
       ...error,
       passwordError:
-        e.target.value.length < 1 ? "الباسورد يجب ان يحتوي على حرف" : "",
+        e.target.value.length < 3
+          ? "الباسورد يجب ان يكون 3 حروف على الاقل"
+          : "",
     });
   };
   const togglePassword = () => {

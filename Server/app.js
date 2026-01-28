@@ -12,12 +12,25 @@ const authRoutes = require("./routes/auth.routes.js");
 const dashboardRoutes = require("./routes/dashboard.routes.js");
 const { protect } = require("./middleware/auth.middleware.js");
 const { errorHandler } = require("./middleware/error.middleware.js");
+const {
+  setupSecurity,
+  setupSanitization,
+} = require("./middleware/security.middleware.js");
 
 const app = express();
 
 app.use(cors());
+
+// Setup Security Headers, Rate Limiting, Compression
+setupSecurity(app); // TODO: Uncomment after running `npm install helmet express-rate-limit express-mongo-sanitize xss-clean compression`
+
+// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Setup Data Sanitization (must be after body parser)
+setupSanitization(app); // TODO: Uncomment after running `npm install helmet express-rate-limit express-mongo-sanitize xss-clean compression`
+
 app.use(morgan("dev"));
 
 app.use("/api/auth", authRoutes);

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import LogoutButton from "./LogoutButton";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from "../assets/logo.jpg";
 // استيراد الأيقونات لجعل الشكل احترافياً
 import {
   DashboardRounded,
@@ -95,11 +96,9 @@ const SideBarComponent = () => {
         <div className="p-6 mb-4">
           {!isMobile ? (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/30">
-                S
-              </div>
-              <span className="font-black text-xl tracking-tight">
-                SMART <span className="text-blue-500">STOCK</span>
+              <img src={logo} alt="logo" className="w-18 h-18" />
+              <span className="font-black text-2xl -tracking-widest mr-2 mt-2">
+                شايش<div className="text-blue-500 mr-4">الياسين</div>
               </span>
             </div>
           ) : (

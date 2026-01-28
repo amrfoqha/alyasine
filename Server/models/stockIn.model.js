@@ -26,7 +26,8 @@ const stockInSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 const stockInModel = mongoose.model("StockIn", stockInSchema);
+stockInSchema.index({ productId: 1 }); // Critical for invoice stock checks
 module.exports = stockInModel;

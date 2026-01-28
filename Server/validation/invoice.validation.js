@@ -25,6 +25,21 @@ module.exports.validateInvoice = async (req, res, next) => {
     if (!["cash", "bank", "check"].includes(paymentType))
       return res.status(400).json({ message: "Invalid payment type" });
 
+    if (paymentType === "check") {
+      const { checkDetails } = req.body;
+      if (
+        !checkDetails ||
+        !checkDetails.checkNumber ||
+        !checkDetails.bankName ||
+        !checkDetails.dueDate
+      ) {
+        return res.status(400).json({
+          message:
+            "Check details (number, bank, due date) are required for check payments",
+        });
+      }
+    }
+
     // ✅ جلب جميع المنتجات مرة واحدة
     const productIds = items.map((i) => i.product);
     const products = await Product.find({ _id: { $in: productIds } }).lean();

@@ -73,8 +73,8 @@ const AddStockDialog = ({ open, setOpen, product, setProducts }) => {
       try {
         await stockIn({
           productId: product?._id,
-          quantity: formData.quantity,
-          costPrice: formData.costPrice,
+          quantity: Number(formData.quantity),
+          costPrice: Number(formData.costPrice),
           date: formData.date,
           note: formData.note,
         });

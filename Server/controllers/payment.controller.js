@@ -37,6 +37,12 @@ module.exports.findAllPayments = async (req, res) => {
           $or: [
             { code: { $regex: search.toLowerCase(), $options: "i" } },
             {
+              "checkDetails.checkNumber": {
+                $regex: search.toLowerCase(),
+                $options: "i",
+              },
+            },
+            {
               "customer.name": { $regex: search.toLowerCase(), $options: "i" },
             },
           ],
@@ -72,7 +78,7 @@ module.exports.findAllPayments = async (req, res) => {
 
 module.exports.findPayment = async (req, res) => {
   try {
-    const payment = await Payment.findById(req.params.id);
+    const payment = await Payment.findById(req.params.id, { isDeleted: false });
     if (!payment) {
       return res.status(404).json({ message: "Payment not found" });
     }
@@ -84,9 +90,14 @@ module.exports.findPayment = async (req, res) => {
 
 module.exports.updatePayment = async (req, res) => {
   try {
-    const payment = await Payment.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const payment = await Payment.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { isDeleted: false },
+      {
+        new: true,
+      },
+    );
     if (!payment) {
       return res.status(404).json({ message: "Payment not found" });
     }
@@ -98,12 +109,27 @@ module.exports.updatePayment = async (req, res) => {
 
 module.exports.deletePayment = async (req, res) => {
   try {
-    const payment = await Payment.findByIdAndDelete(req.params.id);
-    if (!payment) {
-      return res.status(404).json({ message: "Payment not found" });
+    const result = await paymentService.deletePayment(req.params.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.updateCheckStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!["pending", "cleared", "returned"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
     }
+
+    const payment = await paymentService.updateCheckStatus(
+      req.params.id,
+      status,
+    );
     res.json(payment);
   } catch (error) {
+    console.error("Update Check Status Error:", error);
     res.status(500).json({ message: error.message });
   }
 };

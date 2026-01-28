@@ -36,7 +36,10 @@ const UserProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.log(error);
-      return { success: false, message: error.message || "فشل تسجيل الدخول" };
+      return {
+        success: false,
+        message: error.message || "فشل تسجيل الدخول",
+      };
     }
   };
   const register = async (name, password, confirmPassword) => {

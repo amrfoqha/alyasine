@@ -9,5 +9,6 @@ router.get("/", paymentController.findAllPayments);
 router.get("/:id", paymentController.findPayment);
 router.put("/:id", paymentController.updatePayment);
 router.delete("/:id", paymentController.deletePayment);
+router.patch("/:id/status", paymentController.updateCheckStatus);
 
 module.exports = router;

@@ -9,7 +9,7 @@ const PaymentsTable = ({ payments, setSearch }) => {
           آخر العمليات المالية
         </h3>
         <SearchBox
-          placeholder="بحث عن دافع، بيان، أو تاريخ..."
+          placeholder="بحث عن دافع، شيك، أو تفاصيل..."
           className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-sm w-64 outline-none focus:border-blue-500 shadow-sm"
           onChange={(e) => setSearch(e.target.value)}
         />

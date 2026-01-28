@@ -8,6 +8,7 @@ router.post("/", validateInvoice, invoiceController.createInvoice);
 router.get("/", invoiceController.findAllInvoicesByPage);
 router.get("/:id", invoiceController.findInvoice);
 router.delete("/:id", invoiceController.deleteInvoice);
+router.patch("/:id/status", invoiceController.updateCheckStatus);
 router.get("/all", invoiceController.findAllInvoices);
 
 module.exports = router;

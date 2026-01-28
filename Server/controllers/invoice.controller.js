@@ -34,7 +34,15 @@ module.exports.findAllInvoicesByPage = async (req, res) => {
 
     if (search) {
       pipeline.push({
-        $match: { "customer.name": { $regex: search, $options: "i" } },
+        $match: {
+          $or: [
+            { "customer.name": { $regex: search, $options: "i" } },
+            { code: { $regex: search, $options: "i" } },
+            {
+              "checkDetails.checkNumber": { $regex: search, $options: "i" },
+            },
+          ],
+        },
       });
     }
 
@@ -109,6 +117,24 @@ module.exports.findAllInvoices = async (req, res) => {
     const invoices = await Invoice.find().sort({ createdAt: -1 });
     res.json(invoices);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.updateCheckStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!["pending", "cleared", "returned"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const invoice = await invoiceService.updateCheckStatus(
+      req.params.id,
+      status,
+    );
+    res.json(invoice);
+  } catch (error) {
+    console.error("Update Invoice Check Status Error:", error);
     res.status(500).json({ message: error.message });
   }
 };

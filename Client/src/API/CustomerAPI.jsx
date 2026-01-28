@@ -65,3 +65,17 @@ export const getAllCustomers = async () => {
     throw error.response?.data;
   }
 };
+export const getCustomerStatement = async (
+  id,
+  startDate = "",
+  endDate = "",
+) => {
+  try {
+    const response = await BaseAPI.get(
+      `/customers/${id}/statement?startDate=${startDate}&endDate=${endDate}`,
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};

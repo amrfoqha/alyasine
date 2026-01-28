@@ -109,7 +109,7 @@ const InvoicePage = () => {
           <div className="w-full">
             <SearchBox
               onChange={handleSearch}
-              placeholder="ابحث برقم الفاتورة أو اسم الزبون..."
+              placeholder="ابحث برقم الفاتورة، الزبون، أو رقم الشيك..."
             />
           </div>
         </div>

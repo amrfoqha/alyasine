@@ -1,5 +1,7 @@
 const Customer = require("../models/customer.model");
 const { generateCode } = require("../utils/generateCode");
+const Invoice = require("../models/invoices.model");
+const Payment = require("../models/payment.model");
 module.exports.findCustomer = async (req, res) => {
   try {
     const customer = await Customer.findById(req.params.id);
@@ -107,5 +109,47 @@ module.exports.getAllCustomers = async (req, res) => {
     res.json(customers);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports.getCustomerStatement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { startDate, endDate } = req.query;
+
+    const customer = await Customer.findById(id).lean();
+    if (!customer) {
+      return res.status(404).json({ message: "العميل غير موجود" });
+    }
+
+    // بناء فلتر التاريخ ديناميكياً
+    let dateFilter = { customer: id, isDeleted: false };
+    if (startDate || endDate) {
+      dateFilter.date = {};
+      if (startDate) dateFilter.date.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        dateFilter.date.$lte = end;
+      }
+    }
+
+    // جلب البيانات بالتوازي مع الفلترة
+    const [invoices, payments] = await Promise.all([
+      Invoice.find(dateFilter)
+        .sort({ date: 1 })
+        .populate("items.product", "name price unit")
+        .lean(),
+      Payment.find(dateFilter).sort({ date: 1 }).lean(),
+    ]);
+
+    res.json({
+      customer,
+      invoices,
+      payments,
+    });
+  } catch (error) {
+    console.error("Statement Error:", error);
+    res.status(500).json({ message: "حدث خطأ أثناء استخراج كشف الحساب" });
   }
 };

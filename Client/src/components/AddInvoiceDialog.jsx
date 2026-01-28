@@ -57,6 +57,11 @@ const AddInvoiceDialog = ({
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [items, setItems] = useState([]);
+  const [checkDetails, setCheckDetails] = useState({
+    checkNumber: "",
+    bankName: "",
+    dueDate: "",
+  });
 
   // حسابات متقدمة
   const total = useMemo(
@@ -92,6 +97,11 @@ const AddInvoiceDialog = ({
     setItems([]);
     setPaidAmount(0);
     setCustomer(null);
+    setCheckDetails({
+      checkNumber: "",
+      bankName: "",
+      dueDate: "",
+    });
     setSelectedProduct(null);
   };
   const handleSubmit = async (e) => {
@@ -108,15 +118,26 @@ const AddInvoiceDialog = ({
         items: items.map((i) => ({
           product: i.product._id,
 
-          quantity: i.quantity,
+          quantity: Number(i.quantity),
 
-          price: i.price,
+          price: Number(i.price),
         })),
 
         paidAmount: Number(paidAmount),
 
         paymentType: paymentType._id,
       };
+
+      if (paymentType._id === "check") {
+        if (
+          !checkDetails.checkNumber ||
+          !checkDetails.bankName ||
+          !checkDetails.dueDate
+        ) {
+          return toast.error("يرجى إدخال جميع بيانات الشيك");
+        }
+        payload.checkDetails = checkDetails;
+      }
 
       console.log(payload);
       const res = await createInvoice(payload);
@@ -140,21 +161,9 @@ const AddInvoiceDialog = ({
   }, [open]);
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      fullWidth
-      maxWidth="lg"
-      TransitionComponent={Fade}
-      PaperProps={{
-        sx: {
-          borderRadius: "2.8rem",
-          boxShadow: "0 25px 50px -12px rgba(0,0,0,0.25)",
-        },
-      }}
-    >
+    <Dialog open={open} onClose={handleClose} maxWidth="md">
       {/* Header - Dark Mode Aesthetic */}
-      <Box className="flex justify-end items-center w-full text-white p-4 bg-[#0f172a] relative">
+      <Box className="flex justify-end items-center text-white p-4 bg-[#0f172a] relative">
         <Stack direction="row" className=" items-center gap-2" dir="rtl">
           <div className="p-3 bg-blue-500/20 rounded-2xl border border-blue-500/30">
             <ReceiptLongRoundedIcon sx={{ fontSize: 35, color: "#3b82f6" }} />
@@ -187,12 +196,7 @@ const AddInvoiceDialog = ({
       <DialogContent sx={{ p: 0, bgcolor: "#fcfcfc" }} dir="rtl">
         <Grid container sx={{ minHeight: "70vh" }}>
           {/* الجانب الأيمن: المدخلات */}
-          <Grid
-            item
-            xs={12}
-            lg={8}
-            sx={{ p: 5, borderLeft: "1px solid #f1f5f9" }}
-          >
+          <Grid sx={{ p: 5, borderLeft: "1px solid #f1f5f9" }}>
             <Stack spacing={4}>
               {/* بيانات العميل */}
               <Box>
@@ -204,7 +208,7 @@ const AddInvoiceDialog = ({
                   البيانات الأساسية
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={7}>
+                  <Grid>
                     <SelectComponent
                       label="العميل المشتري"
                       options={customers}
@@ -213,12 +217,13 @@ const AddInvoiceDialog = ({
                       optionLabel="name"
                     />
                   </Grid>
-                  <Grid item xs={12} md={5}>
+                  <Grid>
                     <SelectComponent
                       label="وسيلة الدفع"
                       options={[
-                        { _id: "cash", name: "كاش" },
-                        { _id: "bank", name: "حوالة" },
+                        { _id: "cash", name: "نقداً (Cash)" },
+                        { _id: "bank", name: "حوالة بنكية" },
+                        { _id: "check", name: "شيك" },
                       ]}
                       value={paymentType?._id}
                       onChange={setPaymentType}
@@ -226,6 +231,74 @@ const AddInvoiceDialog = ({
                     />
                   </Grid>
                 </Grid>
+
+                {/* تفاصيل الشيك */}
+                {paymentType?._id === "check" && (
+                  <Box
+                    className="animate-in fade-in slide-in-from-top-4"
+                    sx={{
+                      mt: 2,
+                      p: 3,
+                      bgcolor: "#f0f9ff",
+                      borderRadius: "1rem",
+                      border: "1px dashed #bae6fd",
+                    }}
+                  >
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "#0284c7",
+                        fontWeight: "bold",
+                        mb: 2,
+                        display: "block",
+                      }}
+                    >
+                      بيانات الشيك المستلم
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid>
+                        <InputComponent
+                          label="رقم الشيك"
+                          value={checkDetails.checkNumber}
+                          onChange={(e) =>
+                            setCheckDetails({
+                              ...checkDetails,
+                              checkNumber: e.target.value,
+                            })
+                          }
+                          className="bg-white"
+                        />
+                      </Grid>
+                      <Grid>
+                        <InputComponent
+                          label="اسم البنك"
+                          value={checkDetails.bankName}
+                          onChange={(e) =>
+                            setCheckDetails({
+                              ...checkDetails,
+                              bankName: e.target.value,
+                            })
+                          }
+                          className="bg-white"
+                        />
+                      </Grid>
+                      <Grid>
+                        <InputComponent
+                          label="تاريخ الاستحقاق"
+                          type="date"
+                          value={checkDetails.dueDate}
+                          onChange={(e) =>
+                            setCheckDetails({
+                              ...checkDetails,
+                              dueDate: e.target.value,
+                            })
+                          }
+                          className="bg-white"
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
               </Box>
 
               <Divider />
@@ -240,7 +313,7 @@ const AddInvoiceDialog = ({
                 }}
               >
                 <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={6}>
+                  <Grid>
                     <SelectComponent
                       label="البحث عن صنف في المخزن"
                       options={products}
@@ -249,7 +322,7 @@ const AddInvoiceDialog = ({
                       optionLabel="name"
                     />
                   </Grid>
-                  <Grid item xs={6} md={3}>
+                  <Grid>
                     <InputComponent
                       label="الكمية"
                       type="number"
@@ -257,7 +330,7 @@ const AddInvoiceDialog = ({
                       onChange={(e) => setQuantity(e.target.value)}
                     />
                   </Grid>
-                  <Grid item xs={6} md={3}>
+                  <Grid>
                     <ButtonComponent
                       label="إضافة"
                       onClick={addItem}
@@ -368,7 +441,7 @@ const AddInvoiceDialog = ({
           </Grid>
 
           {/* الجانب الأيسر: ملخص الدفع (Checkout Style) */}
-          <Grid item xs={12} lg={4} sx={{ bgcolor: "#f8fafc", p: 5 }}>
+          <Grid sx={{ bgcolor: "#f8fafc", p: 5 }}>
             <Box sx={{ position: "sticky", top: 40 }}>
               <Typography variant="h6" fontWeight="900" sx={{ mb: 4 }}>
                 ملخص العملية
@@ -463,12 +536,12 @@ const AddInvoiceDialog = ({
         <ButtonComponent
           label="إغلاق"
           onClick={handleClose}
-          className="bg-slate-100! text-slate-500! shadow-none hover:bg-slate-200 "
+          className="bg-slate-100 h-full text-slate-500 shadow-none hover:bg-slate-200 py-4"
         />
         <ButtonComponent
           label="حفظ وطباعة الفاتورة"
           disabled={items.length === 0 || !customer}
-          className="flex-1 py-4 bg-blue-600! hover:bg-blue-700! shadow-xl shadow-blue-200 h-full"
+          className="flex-1 py-4 bg-blue-600 shadow-xl shadow-blue-200 h-full"
           onClick={handleSubmit}
         />
       </DialogActions>

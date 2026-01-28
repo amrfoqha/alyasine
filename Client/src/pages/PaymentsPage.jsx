@@ -3,6 +3,7 @@ import AddPaymentDialog from "../components/AddPaymentDialog";
 import Header from "../components/Header";
 import { getPayments } from "../API/PaymentAPI";
 import PaymentsTable from "../components/PaymentsTable";
+import UsePagination from "../context/UsePagination";
 
 const PaymentsPage = () => {
   const [page, setPage] = useState(1);
@@ -26,7 +27,7 @@ const PaymentsPage = () => {
   return (
     <div className="flex flex-col min-h-[80vh] w-full bg-gray-50" dir="rtl">
       <Header title="سجل المدفوعات العام" />
-      <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8" dir="rtl">
+      <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 " dir="rtl">
         {/* Header */}
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
           <div>
@@ -52,7 +53,6 @@ const PaymentsPage = () => {
             </button>
           </div>
         </div>
-
         {/* Stats Section - البطاقات الذكية */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
@@ -84,14 +84,22 @@ const PaymentsPage = () => {
             trend="نسبة التحصيل 62%"
           />
         </div>
-
         {/* Table Section */}
         <PaymentsTable payments={payments} setSearch={setSearch} />
         <AddPaymentDialog
           open={open}
           handleClose={() => setOpen(false)}
-          setPayments={() => setOpen(false)}
+          setPayments={setPayments}
         />
+        <div className="py-8 flex justify-center border-t border-gray-50">
+          <div className="bg-gray-50 px-8 py-2 rounded-2xl border border-gray-100">
+            <UsePagination
+              page={page}
+              setPage={setPage}
+              totalPages={totalPages}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

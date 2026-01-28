@@ -23,6 +23,11 @@ const AddPaymentDialog = ({ open, handleClose, setPayments }) => {
     method: "cash",
     note: "بلا",
     customer: "",
+    checkDetails: {
+      checkNumber: "",
+      bankName: "",
+      dueDate: "",
+    },
   });
   const [errors, setErrors] = useState({
     amount: "",
@@ -36,7 +41,26 @@ const AddPaymentDialog = ({ open, handleClose, setPayments }) => {
     e.preventDefault();
     try {
       console.log(form);
-      const res = await createPayment(form);
+      const payload = {
+        ...form,
+        amount: Number(form.amount),
+        customer: form.customer,
+      };
+
+      if (form.method === "check") {
+        if (
+          !form.checkDetails.checkNumber ||
+          !form.checkDetails.bankName ||
+          !form.checkDetails.dueDate
+        ) {
+          toast.error("يرجى ملء جميع بيانات الشيك");
+          return;
+        }
+      } else {
+        delete payload.checkDetails;
+      }
+
+      const res = await createPayment(payload);
       console.log(res);
       setPayments((prev) => [...prev, res]);
       toast.success("تم إضافة الدفعة بنجاح");
@@ -103,16 +127,8 @@ const AddPaymentDialog = ({ open, handleClose, setPayments }) => {
     <Dialog
       open={open}
       onClose={handleClose}
-      TransitionComponent={Fade}
       transitionDuration={400}
-      fullWidth
       maxWidth="sm"
-      PaperProps={{
-        style: {
-          borderRadius: "2rem",
-          overflow: "hidden",
-        },
-      }}
     >
       <div className="bg-white flex flex-col font-sans" dir="rtl">
         {/* Header - تدرج لوني عصري */}
@@ -231,6 +247,70 @@ const AddPaymentDialog = ({ open, handleClose, setPayments }) => {
                 <option value="check">🎫 شيك برسم التحصيل</option>
               </select>
             </div>
+
+            {/* تفاصيل الشيك - يظهر فقط عند اختيار شيك */}
+            {form.method === "check" && (
+              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-black text-blue-800 block px-1">
+                    بيانات الشيك
+                  </label>
+                </div>
+                <div className="space-y-1">
+                  <input
+                    type="text"
+                    placeholder="رقم الشيك"
+                    value={form.checkDetails.checkNumber}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        checkDetails: {
+                          ...form.checkDetails,
+                          checkNumber: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full border border-blue-200 rounded-xl p-3 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <input
+                    type="text"
+                    placeholder="اسم البنك"
+                    value={form.checkDetails.bankName}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        checkDetails: {
+                          ...form.checkDetails,
+                          bankName: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full border border-blue-200 rounded-xl p-3 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white text-sm"
+                  />
+                </div>
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-blue-600 block px-1">
+                    تاريخ استحقاق الشيك
+                  </label>
+                  <input
+                    type="date"
+                    value={form.checkDetails.dueDate}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        checkDetails: {
+                          ...form.checkDetails,
+                          dueDate: e.target.value,
+                        },
+                      })
+                    }
+                    className="w-full border border-blue-200 rounded-xl p-3 focus:ring-2 focus:ring-blue-500/20 outline-none bg-white text-sm font-bold text-slate-600"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* ملاحظات */}
             <div className="space-y-2">

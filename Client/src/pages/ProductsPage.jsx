@@ -65,7 +65,7 @@ const ProductsPage = () => {
         className="max-w-7xl mx-auto px-8 py-8 flex flex-col md:flex-row justify-between items-center gap-6"
       >
         <div className="flex flex-col md:flex-row items-center gap-4">
-          <Box className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
+          <Box className="bg-white p-4 rounded-4xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="bg-blue-50 p-3 rounded-2xl text-blue-600">
               <CategoryIcon fontSize="medium" />
             </div>
@@ -82,7 +82,7 @@ const ProductsPage = () => {
             </div>
           </Box>
 
-          <Box className="bg-white p-4 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-4">
+          <Box className="bg-white p-4 rounded-4xl shadow-sm border border-gray-100 flex items-center gap-4">
             <div className="bg-emerald-50 p-3 rounded-2xl text-emerald-600">
               <CalendarMonthIcon fontSize="medium" />
             </div>
@@ -126,7 +126,7 @@ const ProductsPage = () => {
 
           <Button
             variant="contained"
-            startIcon={<AddIcon />}
+            startIcon={<AddIcon className="ml-2" />}
             onClick={() => setOpen(true)}
             sx={{
               background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",

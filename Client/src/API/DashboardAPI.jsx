@@ -1,8 +1,12 @@
 import BaseAPI from "./BaseAPI";
 
-export const getDashboardStats = async () => {
+export const getDashboardStats = async (startDate, endDate) => {
   try {
-    const response = await BaseAPI.get("/dashboard");
+    let url = "/dashboard";
+    if (startDate && endDate) {
+      url += `?startDate=${startDate}&endDate=${endDate}`;
+    }
+    const response = await BaseAPI.get(url);
     return response.data;
   } catch (error) {
     throw error.response?.data;

@@ -35,5 +35,6 @@ const customerSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+customerSchema.index({ phone: 1 });
 const customerModel = mongoose.model("Customer", customerSchema);
 module.exports = customerModel;

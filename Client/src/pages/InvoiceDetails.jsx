@@ -50,81 +50,88 @@ const InvoiceDetails = () => {
         <BackButton />
       </div>
       <div
-        className="max-w-4xl mx-auto my-8 p-6 bg-white shadow-2xl border border-gray-100 font-sans relative"
+        className="max-w-4xl mx-auto my-4 p-4 bg-white shadow-2xl border border-gray-100 font-sans relative"
         dir="rtl"
         id="invoicePage"
       >
         {/* علامة مائية اختيارية (Optional Watermark) */}
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
-          <h1 className="text-[200px] font-black rotate-45 text-gray-400 uppercase">
+          <h1 className="text-[120px] font-black rotate-45 text-gray-400 uppercase">
             الأصلية
           </h1>
         </div>
 
         {/* HEADER: معلومات الشركة */}
-        <div className="flex justify-between items-start border-b-4 border-blue-900 pb-4 relative z-10">
+        <div className="flex justify-between items-start border-b-2 border-blue-900 pb-2 relative z-10">
           <div className="text-right">
-            <h2 className="text-4xl font-black text-blue-900 mb-2">
-              شايش الياسين
+            <h2 className="text-2xl font-black text-blue-900 mb-1">
+              شركة الياسين للتجارة والمقاولات
             </h2>
             <div className="flex gap-2">
-              <p className="text-gray-700 text-sm">السجل التجاري: 123456789</p>
-              <p className="text-gray-700 text-sm">الرقم الضريبي: 987654321</p>
+              <p className="text-gray-700 text-[10px]">
+                السجل التجاري: 123456789
+              </p>
+              <p className="text-gray-700 text-[10px]">
+                الرقم الضريبي: 987654321
+              </p>
             </div>
-            <p className="text-gray-700 text-sm">
+            <p className="text-gray-700 text-[10px]">
               العنوان: فلسطين، نابلس، ديرشرف
             </p>
-            <p className="text-gray-700 text-sm italic">
+            <p className="text-gray-700 text-[10px] italic">
               هاتف: 059XXXXXXX | بريد: info@store.ps
             </p>
           </div>
-          <div className="text-left bg-blue-900 text-white p-4 rounded-bl-3xl min-w-[200px]">
-            <h1 className="text-3xl font-bold mb-2">فاتورة ضريبية</h1>
-            <p className="text-sm opacity-90 font-mono">رقم: {invoice.code}</p>
-            <p className="text-sm opacity-90">
+          <div className="text-left bg-blue-900 text-white p-2 rounded-bl-2xl min-w-[150px]">
+            <h1 className="text-xl font-bold mb-1">فاتورة ضريبية</h1>
+            <p className="text-[10px] opacity-90 font-mono">
+              رقم: {invoice.code}
+            </p>
+            <p className="text-[10px] opacity-90">
               تاريخ: {new Date(invoice.date).toLocaleDateString("ar-EG")}
             </p>
           </div>
         </div>
 
         {/* CUSTOMER & DETAILS: معلومات العميل */}
-        <div className="grid grid-cols-2 gap-10 mt-4">
+        <div className="grid grid-cols-2 gap-4 mt-2">
           <div className="border-r-2 border-gray-100 pr-4">
-            <h4 className="text-blue-900 font-bold mb-3 uppercase tracking-wider underline">
+            <h4 className="text-blue-900 text-[10px] font-bold mb-1 uppercase tracking-wider underline">
               بيانات العميل:
             </h4>
-            <p className="text-xl font-bold text-gray-800">
+            <p className="text-lg font-bold text-gray-800 leading-tight">
               {invoice.customer.name}
             </p>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 text-[10px] mt-0.5">
               العنوان: {invoice.customer.address || "غير متوفر"}
             </p>
-            <p className="text-gray-600">الجوال: {invoice.customer.phone}</p>
+            <p className="text-gray-600 text-[10px]">
+              الجوال: {invoice.customer.phone}
+            </p>
           </div>
           <div className="flex flex-col justify-center items-end">
-            {/* QR Code Placeholder - يمكن ربطه بمكتبة QRCode */}
-            <div className="w-24 h-24 bg-gray-200 flex items-center justify-center border border-gray-300 text-[10px] text-gray-500 text-center">
+            <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border border-gray-300 text-[8px] text-gray-500 text-center">
               QR CODE <br /> التحقق الرقمي
             </div>
           </div>
         </div>
 
         {/* TABLE: قائمة الأصناف */}
-        <div className="mt-4">
-          <table className="w-full text-right overflow-hidden rounded-t-xl">
+        <div className="mt-2 text-[11px]">
+          <table className="w-full text-right overflow-hidden rounded-t-lg">
             <thead>
-              <tr className="bg-blue-900 text-white text-sm">
-                <th className="py-2 px-4 border-l border-blue-800">#</th>
-                <th className="py-2 px-4 border-l border-blue-800">
+              <tr className="bg-blue-900 text-white">
+                <th className="py-1 px-3 border-l border-blue-800">#</th>
+                <th className="py-1 px-3 border-l border-blue-800">
                   بيان الصنف
                 </th>
-                <th className="py-2 px-4 border-l border-blue-800 text-center">
+                <th className="py-1 px-3 border-l border-blue-800 text-center">
                   الكمية
                 </th>
-                <th className="py-2 px-4 border-l border-blue-800 text-center">
+                <th className="py-1 px-3 border-l border-blue-800 text-center">
                   سعر الوحدة
                 </th>
-                <th className="py-2 px-4 text-center">الإجمالي</th>
+                <th className="py-1 px-3 text-center">الإجمالي</th>
               </tr>
             </thead>
             <tbody className="text-gray-700 bg-white">
@@ -133,19 +140,19 @@ const InvoiceDetails = () => {
                   key={item._id}
                   className="border-b border-gray-100 odd:bg-gray-50"
                 >
-                  <td className="py-2 px-4 text-center border-l border-gray-100">
+                  <td className="py-1 px-3 text-center border-l border-gray-100">
                     {i + 1}
                   </td>
-                  <td className="py-2 px-4 font-medium text-gray-900 border-l border-gray-100">
+                  <td className="py-1 px-3 font-medium text-gray-900 border-l border-gray-100">
                     {item.product.name}
                   </td>
-                  <td className="py-2 px-4 text-center border-l border-gray-100 font-mono italic">
+                  <td className="py-1 px-3 text-center border-l border-gray-100 font-mono italic">
                     {item.quantity} {item.product.unit}
                   </td>
-                  <td className="py-2 px-4 text-center border-l border-gray-100 font-mono">
+                  <td className="py-1 px-3 text-center border-l border-gray-100 font-mono">
                     {formatCurrency(item.price)}
                   </td>
-                  <td className="py-2 px-4 text-center font-bold text-blue-900">
+                  <td className="py-1 px-3 text-center font-bold text-blue-900">
                     {formatCurrency(item.quantity * item.price)}
                   </td>
                 </tr>
@@ -155,47 +162,114 @@ const InvoiceDetails = () => {
         </div>
 
         {/* SUMMARY: ملخص الحسابات */}
-        <div className="mt-10 grid grid-cols-2 gap-8">
-          <div className="text-gray-600 text-sm leading-relaxed border border-dashed border-gray-300 p-4 rounded-lg">
-            <p className="font-bold mb-2">الشروط والأحكام:</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>البضاعة المباعة لا ترد ولا تستبدل بعد 3 أيام.</li>
-              <li>يجب إبراز الفاتورة الأصلية عند الاستبدال.</li>
-              <li>الأسعار تشمل ضريبة القيمة المضافة القانونية.</li>
-            </ul>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <div className="space-y-2">
+            {/* الشروط والأحكام */}
+            <div className="text-gray-600 text-[10px] leading-tight border border-dashed border-gray-300 p-2 rounded-lg">
+              <p className="font-bold mb-1">الشروط والأحكام:</p>
+              <ul className="list-disc list-inside space-y-0.5">
+                <li>البضاعة المباعة لا ترد ولا تستبدل بعد 3 أيام.</li>
+                <li>يجب إبراز الفاتورة الأصلية عند الاستبدال.</li>
+                <li>الأسعار تشمل ضريبة القيمة المضافة القانونية.</li>
+              </ul>
+            </div>
+
+            {/* تفاصيل الدفع (Payment Details) */}
+            <div className="bg-slate-50 p-2 rounded-lg border border-slate-200">
+              <h5 className="font-black text-slate-800 text-[11px] mb-1 underline decoration-blue-500 underline-offset-2">
+                معلومات السداد:
+              </h5>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px]">
+                <p className="text-slate-500 font-bold">طريقة الدفع:</p>
+                <p className="font-black text-blue-900">
+                  {invoice.paymentType === "cash"
+                    ? "نقداً (Cash)"
+                    : invoice.paymentType === "bank"
+                      ? "حوالة بنكية"
+                      : "شيك"}
+                </p>
+                {invoice.paymentType === "check" && invoice.checkDetails && (
+                  <>
+                    <p className="text-slate-500 font-bold">رقم الشيك:</p>
+                    <p className="font-mono font-black">
+                      {invoice.checkDetails.checkNumber}
+                    </p>
+                    <p className="text-slate-500 font-bold">البنك:</p>
+                    <p className="font-black">
+                      {invoice.checkDetails.bankName}
+                    </p>
+                    <p className="text-slate-500 font-bold">الاستحقاق:</p>
+                    <p className="font-mono font-black text-red-600">
+                      {new Date(
+                        invoice.checkDetails.dueDate,
+                      ).toLocaleDateString("ar-EG")}
+                    </p>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-            <div className="flex justify-between py-2 border-b border-blue-200">
-              <span>المجموع قبل الضريبة:</span>
-              <span className="font-mono">{formatCurrency(subtotal)}</span>
+          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm">
+            <div className="flex justify-between py-1 border-b border-blue-200 text-[11px]">
+              <span className="text-slate-600 font-bold">
+                المجموع قبل الضريبة:
+              </span>
+              <span className="font-mono font-black">
+                {formatCurrency(subtotal)}
+              </span>
             </div>
-            <div className="flex justify-between py-2 border-b border-blue-200">
-              <span>ضريبة القيمة المضافة (16%):</span>
-              <span className="font-mono">{formatCurrency(taxAmount)}</span>
+            <div className="flex justify-between py-1 border-b border-blue-200 text-[11px]">
+              <span className="text-slate-600 font-bold">
+                ضريبة القيمة المضافة (16%):
+              </span>
+              <span className="font-mono font-black">
+                {formatCurrency(taxAmount)}
+              </span>
             </div>
-            <div className="flex justify-between py-4 text-2xl font-black text-blue-900">
+            <div className="flex justify-between py-2 text-xl font-black text-blue-900 border-b-2 border-blue-200">
               <span>الإجمالي النهائي:</span>
               <span>{formatCurrency(invoice.total)}</span>
             </div>
-            <div className="mt-4 p-2 bg-white text-xs border border-blue-200 text-center font-bold text-gray-500 rounded">
-              فقط {invoice.total} شيكل لا غير
+
+            {/* تفاصيل المدفوع والمتبقي (Paid & Remaining) */}
+            <div className="mt-2 space-y-1">
+              <div className="flex justify-between text-[11px]">
+                <span className="text-green-700 font-bold">
+                  المبلغ المدفوع:
+                </span>
+                <span className="font-mono font-black text-green-700">
+                  {formatCurrency(invoice.paidAmount || 0)}
+                </span>
+              </div>
+              <div className="flex justify-between text-[11px]">
+                <span className="text-red-700 font-bold">المبلغ المتبقي:</span>
+                <span className="font-mono font-black text-red-700">
+                  {formatCurrency(
+                    Math.max(0, invoice.total - (invoice.paidAmount || 0)),
+                  )}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-2 p-1 bg-blue-900 text-white text-[9px] text-center font-bold rounded uppercase tracking-widest">
+              فقط {invoice.remainingAmount} شيكل لا غير
             </div>
           </div>
         </div>
 
         {/* SIGNATURES: التوقيعات */}
-        <div className="mt-10 grid grid-cols-2 gap-20 text-center ">
+        <div className="mt-6 grid grid-cols-2 gap-10 text-center ">
           <div>
-            <div className="border-t border-gray-400 mt-2 pt-2 text-xs text-gray-700 font-bold italic">
+            <div className="border-t border-gray-400 mt-1 pt-1 text-[10px] text-gray-700 font-bold italic">
               ختم الشركة
             </div>
           </div>
-          <div className="flex flex-row gap-10 justify-between px-10">
-            <div className="border-t border-gray-400 mt-2 pt-2 text-xs text-gray-700 font-bold italic">
+          <div className="flex flex-row gap-6 justify-between px-6">
+            <div className="border-t border-gray-400 mt-1 pt-1 text-[10px] text-gray-700 font-bold italic">
               توقيع المحاسب
             </div>
-            <div className="border-t border-gray-400 mt-2 pt-2 text-xs text-gray-700 font-bold italic">
+            <div className="border-t border-gray-400 mt-1 pt-1 text-[10px] text-gray-700 font-bold italic">
               توقيع المستلم
             </div>
           </div>
@@ -226,25 +300,35 @@ const InvoiceDetails = () => {
       </div>
       <style>{`
     @media print {
-      /* إخفاء كل شيء في الصفحة */
+      @page { size: A4; margin: 10mm; }
       body * {
         visibility: hidden;
       }
-      /* إظهار الفاتورة فقط وكل ما بداخلها */
       #invoicePage, #invoicePage * {
         visibility: visible;
       }
-      /* تحديد مكان الفاتورة في الصفحة المطبوعة */
       #invoicePage {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
-      /* إخفاء الأزرار يدوياً للتأكيد */
       .no-print {
         display: none !important;
       }
+      /* تحسين الألوان للطباعة */
+      .bg-blue-900 { background-color: #1e3a8a !important; color: white !important; -webkit-print-color-adjust: exact; }
+      .bg-blue-50 { background-color: #eff6ff !important; -webkit-print-color-adjust: exact; }
+      .text-blue-900 { color: #1e3a8a !important; }
+      .border-blue-900 { border-color: #1e3a8a !important; }
+      
+      /* منع تقطيع الصفوف وترك بصمة الصفحة */
+      tr { page-break-inside: avoid; }
+      h2, h1, p { margin: 2px 0 !important; }
     }
   `}</style>
     </div>

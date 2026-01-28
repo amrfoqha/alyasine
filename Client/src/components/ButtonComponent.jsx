@@ -8,6 +8,7 @@ const ButtonComponent = ({
   type = "button",
   disabled = false,
   icon,
+  children,
 }) => {
   const baseStyles =
     "relative flex items-center justify-center gap-2 px-6 py-2.5 font-bold transition-all duration-300 rounded-xl overflow-hidden shadow-md active:scale-95";
@@ -34,6 +35,7 @@ const ButtonComponent = ({
       <span className="tracking-wide text-sm md:text-base leading-none">
         {label}
       </span>
+      {children}
     </motion.button>
   );
 };
