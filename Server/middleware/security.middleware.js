@@ -13,7 +13,7 @@ module.exports.setupSecurity = (app) => {
 
   // Limit requests from same API
   const limiter = rateLimit({
-    max: 100,
+    max: 200,
     windowMs: 15 * 60 * 1000,
     message: "Too many requests from this IP, please try again in 15 minutes",
   });

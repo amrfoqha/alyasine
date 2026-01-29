@@ -20,24 +20,57 @@ module.exports.findAllCustomers = async (req, res) => {
     const limit = Math.max(parseInt(req.query.limit) || 10, 1);
     const skip = (page - 1) * limit;
     const { search } = req.query;
-    let query = { isDeleted: false };
+
+    const pipeline = [{ $match: { isDeleted: false } }];
+
+    // 1. Add Search Stage if search exists
     if (search) {
-      query.name = { $regex: search, $options: "i" };
+      pipeline.push({
+        $match: {
+          $or: [
+            { name: { $regex: search.trim(), $options: "i" } },
+            { code: { $regex: search.trim(), $options: "i" } },
+            { phone: { $regex: search.trim(), $options: "i" } },
+            { address: { $regex: search.trim(), $options: "i" } },
+          ],
+        },
+      });
     }
-    const customers = await Customer.find(query).skip(skip).limit(limit);
-    const totalItems = await Customer.countDocuments(query);
+
+    // 2. The Facet Stage: Handles Count and Data simultaneously
+    pipeline.push({
+      $facet: {
+        metadata: [{ $count: "total" }],
+        data: [
+          { $sort: { createdAt: -1 } }, // Assuming you want newest first
+          { $skip: skip },
+          { $limit: limit },
+        ],
+      },
+    });
+
+    const [result] = await Customer.aggregate(pipeline);
+
+    // 3. Extract results safely
+    const totalItems = result.metadata[0]?.total || 0;
+    const customers = result.data;
     const totalPages = Math.ceil(totalItems / limit);
-    const customersCount = await Customer.countDocuments({ isDeleted: false });
+
+    // Optional: If you still need the count of ALL customers regardless of search:
+    const customersCount = search
+      ? await Customer.countDocuments({ isDeleted: false })
+      : totalItems;
+
     res.json({
       customers,
       pagination: {
         page,
         limit,
-        totalItems,
+        totalItems, // Total matches for the search
         totalPages,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
-        customersCount,
+        customersCount, // Total customers in DB
       },
     });
   } catch (error) {

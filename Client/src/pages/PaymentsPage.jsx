@@ -11,16 +11,25 @@ const PaymentsPage = () => {
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [totalPayments, setTotalPayments] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [countPendingCheck, setCountPendingCheck] = useState(0);
+  const [totalCheckPendingAmount, setTotalCheckPendingAmount] = useState(0);
   const [open, setOpen] = useState(false);
   const [payments, setPayments] = useState([]);
 
   useEffect(() => {
     const fetchPayments = async () => {
       const res = await getPayments(page, limit, search);
+      console.log(res);
       setPayments(res.payments);
       setPage(res.pagination.page);
       setTotalPages(res.pagination.totalPages);
       setTotalItems(res.pagination.totalPayments);
+      setTotalPayments(res.pagination.totalPayments);
+      setTotalAmount(res.pagination.totalAmount);
+      setCountPendingCheck(res.pagination.countPendingCheck);
+      setTotalCheckPendingAmount(res.pagination.totalCheckPendingAmount);
     };
     fetchPayments();
   }, [page, limit, search]);
@@ -57,21 +66,21 @@ const PaymentsPage = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
             title="إجمالي المحصل"
-            amount="12,500"
+            amount={totalAmount}
             color="bg-green-600"
             icon="💰"
             trend="+12% هذا الشهر"
           />
           <StatCard
             title="دفعات قيد الانتظار"
-            amount="3,200"
+            amount={totalCheckPendingAmount}
             color="bg-amber-500"
             icon="⏳"
-            trend="5 شيكات"
+            trend={countPendingCheck}
           />
           <StatCard
             title="متوسط الدفعة"
-            amount="850"
+            amount={(totalAmount / totalPayments).toFixed(2)}
             color="bg-blue-600"
             icon="📊"
             trend="معدل مستقر"

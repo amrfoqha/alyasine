@@ -28,50 +28,80 @@ module.exports.findAllPayments = async (req, res) => {
         },
       },
       { $unwind: "$customer" },
-      { $sort: { createdAt: -1 } },
     ];
 
+    // Apply search filter to the pipeline BEFORE counting/paging
     if (search) {
       pipeline.push({
         $match: {
           $or: [
-            { code: { $regex: search.toLowerCase(), $options: "i" } },
-            {
-              "checkDetails.checkNumber": {
-                $regex: search.toLowerCase(),
-                $options: "i",
-              },
-            },
-            {
-              "customer.name": { $regex: search.toLowerCase(), $options: "i" },
-            },
+            { code: { $regex: search, $options: "i" } },
+            { "checkDetails.checkNumber": { $regex: search, $options: "i" } },
+            { "customer.name": { $regex: search, $options: "i" } },
           ],
         },
       });
     }
-    pipeline.push(
-      { $skip: skip },
-      { $limit: limit },
-      { $sort: { createdAt: -1 } },
-    );
-    const payments = await Payment.aggregate(pipeline);
-    const totalPayments = await Payment.countDocuments({ isDeleted: false });
+
+    // The Magic: Get Count and Data in one go
+    pipeline.push({
+      $facet: {
+        metadata: [
+          {
+            $group: {
+              _id: null,
+              totalCount: { $sum: 1 },
+              totalAmount: { $sum: "$amount" },
+            },
+          },
+        ],
+        data: [
+          { $sort: { createdAt: -1 } },
+          { $skip: skip },
+          { $limit: limit },
+        ],
+      },
+    });
+
+    const [result] = await Payment.aggregate(pipeline);
+    const PendingCheck = await Payment.aggregate([
+      {
+        $match: {
+          method: "check",
+          "checkDetails.status": "pending",
+          isDeleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalCount: { $sum: 1 },
+          totalAmount: { $sum: "$amount" },
+        },
+      },
+    ]);
+
+    const totalPayments = result.metadata[0]?.totalCount || 0;
+    const totalAmount = result.metadata[0]?.totalAmount || 0;
     const totalPages = Math.ceil(totalPayments / limit);
-    const paymentsCount = await Payment.countDocuments({ isDeleted: false });
+    const payments = result.data;
+
     res.json({
       payments,
       pagination: {
         page,
         limit,
-        totalPayments,
         totalPages,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
-        paymentsCount,
+        totalPayments,
+        totalAmount,
+        countPendingCheck: PendingCheck[0]?.totalCount || 0,
+        totalCheckPendingAmount: PendingCheck[0]?.totalAmount || 0,
       },
     });
   } catch (error) {
-    throw error;
+    // Note: Don't 'throw error' before res.status, or the response will never send!
     res.status(500).json({ message: error.message });
   }
 };

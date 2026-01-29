@@ -330,7 +330,10 @@ const AddProductDialog = ({ open, setOpen, productCategory, setProducts }) => {
             label="إضافة المنتج"
             type="submit"
             disabled={
-              Object.values(errors).some(Boolean) ||
+              errors.name ||
+              errors.sellPrice ||
+              errors.unit ||
+              errors.description ||
               !name ||
               !sellPrice ||
               !unit ||

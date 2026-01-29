@@ -68,6 +68,7 @@ const AddPaymentDialog = ({ open, handleClose, setPayments }) => {
     } catch (error) {
       console.log(error);
       toast.error("حدث خطأ أثناء إضافة الدفعة");
+      toast.error(error.message);
     }
   };
 

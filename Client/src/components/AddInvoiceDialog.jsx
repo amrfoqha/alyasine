@@ -374,7 +374,7 @@ const AddInvoiceDialog = ({
                 elevation={0}
                 sx={{ borderRadius: "1.5rem", border: "1px solid #e2e8f0" }}
               >
-                <Table stickyHeader>
+                <Table>
                   <TableHead>
                     <TableRow
                       sx={{ "& th": { bgcolor: "#f1f5f9", fontWeight: "900" } }}

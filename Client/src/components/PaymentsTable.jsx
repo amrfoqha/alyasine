@@ -31,9 +31,11 @@ const PaymentsTable = ({ payments, setSearch }) => {
                 key={payment._id}
                 name={payment.customer?.name}
                 desc={payment.note}
+                code={payment.code}
                 date={payment.date.split("T")[0]}
                 type={payment.method}
                 amount={payment.amount}
+                checkDetails={payment.checkDetails || "لا يوجد"}
               />
             ))}
           </tbody>
@@ -43,11 +45,12 @@ const PaymentsTable = ({ payments, setSearch }) => {
   );
 };
 
-const PaymentRow = ({ name, desc, date, type, amount }) => (
+const PaymentRow = ({ name, desc, code, date, type, amount, checkDetails }) => (
   <tr className="hover:bg-blue-50/30 transition-colors group">
     <td className="py-5 px-8">
       <div className="font-bold text-gray-800">{name}</div>
       <div className="text-xs text-gray-400 mt-0.5">{desc || "لا يوجد"}</div>
+      <div className="text-xs text-gray-400 mt-0.5">{code || "لا يوجد"}</div>
     </td>
     <td className="py-5 px-8 text-center text-gray-500 font-mono text-sm">
       {date}
@@ -56,6 +59,10 @@ const PaymentRow = ({ name, desc, date, type, amount }) => (
       <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
         {type}
       </span>
+      <div className="text-[11px] text-blue-600 mt-1 font-black">
+        شيك: {checkDetails.checkNumber} | بنك: {checkDetails.bankName} |
+        استحقاق: {checkDetails.dueDate?.split("T")[0]}
+      </div>
     </td>
     <td className="py-5 px-8 text-center font-black text-blue-900 font-mono">
       {amount} ₪

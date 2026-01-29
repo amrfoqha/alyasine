@@ -94,6 +94,8 @@ const AddStockDialog = ({ open, setOpen, product, setProducts }) => {
         console.log(error);
         toast.error("حدث خطأ أثناء إضافة البضاعة");
       }
+    } else {
+      toast.error("يرجى إدخال جميع الحقول بشكل صحيح");
     }
   };
 

@@ -316,13 +316,13 @@ const DashboardPage = () => {
                 <Button
                   size="large"
                   className="text-indigo-600"
-                  onClick={() => navigate("/payments")}
+                  onClick={() => navigate("/checks")}
                 >
                   عرض الكل
                 </Button>
               </div>
               <Paper className="rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <ChecksTable data={stats.AllChecks} />
+                <ChecksTable checks={stats.AllChecks} />
               </Paper>
             </div>
           </div>

@@ -19,6 +19,7 @@ import InvoiceDetails from "./pages/InvoiceDetails";
 import InvoiceRoutes from "./Routes/InvoiceRoutes";
 import PaymentsPage from "./pages/PaymentsPage";
 import CustomerStatementPage from "./pages/CustomerStatementPage";
+import ChecksPage from "./pages/ChecksPage";
 function App() {
   const { loading } = useContext(Auth);
   if (loading) {
@@ -52,6 +53,7 @@ function App() {
             <Route path=":id" element={<InvoiceDetails />} />
           </Route>
           <Route path="payments" element={<PaymentsPage />} />
+          <Route path="checks" element={<ChecksPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

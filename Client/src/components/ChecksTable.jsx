@@ -1,7 +1,8 @@
 import React from "react";
 import { Chip, Typography } from "@mui/material";
 
-const ChecksTable = ({ data = [] }) => {
+const ChecksTable = ({ checks = [], setChecks = () => {} }) => {
+  console.log(checks);
   return (
     <div className="overflow-x-auto w-full min-h-[200px] max-h-[380px]">
       <table className="w-full text-right border-collapse">
@@ -23,8 +24,8 @@ const ChecksTable = ({ data = [] }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
-          {data.length > 0 ? (
-            data.map((item) => (
+          {checks.length > 0 ? (
+            checks.map((item) => (
               <tr
                 key={item._id}
                 className="hover:bg-gray-50 transition-colors group"
