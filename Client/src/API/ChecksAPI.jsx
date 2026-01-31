@@ -15,3 +15,14 @@ export const getChecks = async (
     throw error.response?.data;
   }
 };
+
+export const updateCheckStatus = async (id, status) => {
+  try {
+    const response = await BaseAPI.patch(`/checks/${id}/status`, {
+      status,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};

@@ -19,3 +19,12 @@ export const createPayment = async (payment) => {
     throw error.response?.data;
   }
 };
+
+export const deletePayment = async (id) => {
+  try {
+    const response = await BaseAPI.delete(`/payments/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data;
+  }
+};

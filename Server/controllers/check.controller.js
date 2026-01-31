@@ -1,6 +1,8 @@
 const Invoice = require("../models/invoices.model");
 const Payment = require("../models/payment.model");
 const Customer = require("../models/customer.model");
+const invoiceService = require("../services/invoice.service");
+const paymentService = require("../services/payment.service");
 
 exports.getAllChecks = async (req, res) => {
   try {
@@ -66,6 +68,9 @@ exports.getAllChecks = async (req, res) => {
     }
 
     // 4. Use $facet to get Total Stats AND Paginated Data in ONE query
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // لنهاية اليوم الحالي
+
     pipeline.push({
       $facet: {
         metadata: [
@@ -74,11 +79,39 @@ exports.getAllChecks = async (req, res) => {
               _id: null,
               totalCount: { $sum: 1 },
               totalAmount: { $sum: "$amount" },
+              dueCount: {
+                $sum: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ["$checkDetails.status", "pending"] },
+                        { $lte: ["$checkDetails.dueDate", today] },
+                      ],
+                    },
+                    1,
+                    0,
+                  ],
+                },
+              },
+              dueAmount: {
+                $sum: {
+                  $cond: [
+                    {
+                      $and: [
+                        { $eq: ["$checkDetails.status", "pending"] },
+                        { $lte: ["$checkDetails.dueDate", today] },
+                      ],
+                    },
+                    "$amount",
+                    0,
+                  ],
+                },
+              },
             },
           },
         ],
         data: [
-          { $sort: { createdAt: -1 } },
+          { $sort: { "checkDetails.dueDate": 1, createdAt: -1 } }, // ترتيب حسب الاستحقاق
           { $skip: skip },
           { $limit: limit },
         ],
@@ -87,13 +120,20 @@ exports.getAllChecks = async (req, res) => {
 
     const [results] = await Payment.aggregate(pipeline);
 
-    const metadata = results.metadata[0] || { totalCount: 0, totalAmount: 0 };
+    const metadata = results.metadata[0] || {
+      totalCount: 0,
+      totalAmount: 0,
+      dueCount: 0,
+      dueAmount: 0,
+    };
     const allChecks = results.data;
 
     res.json({
       AllChecks: allChecks,
       totalCount: metadata.totalCount,
       totalAmount: metadata.totalAmount,
+      dueCount: metadata.dueCount,
+      dueAmount: metadata.dueAmount,
       currentPage: page,
       totalPages: Math.ceil(metadata.totalCount / limit),
     });
@@ -139,6 +179,36 @@ exports.deleteCheck = async (req, res) => {
     const check = await Invoice.findByIdAndDelete(req.params.id);
     res.json(check);
   } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.updateCheckStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Try finding in Invoices first
+    let transaction = await Invoice.findById(id);
+    if (transaction) {
+      if (transaction.paymentType === "check") {
+        const result = await invoiceService.updateCheckStatus(id, status);
+        return res.json(result);
+      }
+    }
+
+    // If not found or not a check in Invoices, try Payments
+    transaction = await Payment.findById(id);
+    if (transaction) {
+      if (transaction.method === "check") {
+        const result = await paymentService.updateCheckStatus(id, status);
+        return res.json(result);
+      }
+    }
+
+    return res.status(404).json({ message: "Check not found" });
+  } catch (err) {
+    console.error("Unified Update Check Status Error:", err);
     res.status(500).json({ message: err.message });
   }
 };

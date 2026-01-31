@@ -155,10 +155,12 @@ module.exports.getCustomerStatement = async (req, res) => {
       return res.status(404).json({ message: "العميل غير موجود" });
     }
 
-    // بناء فلتر التاريخ ديناميكياً
+    const CustomerLedger = require("../models/customerLedger.model");
+
+    // Build filter
     let dateFilter = { customer: id, isDeleted: false };
     if (startDate || endDate) {
-      dateFilter.date = {};
+      dateFilter.date = {}; // Ledger entries usually use createdAt for their timestamp
       if (startDate) dateFilter.date.$gte = new Date(startDate);
       if (endDate) {
         const end = new Date(endDate);
@@ -167,19 +169,31 @@ module.exports.getCustomerStatement = async (req, res) => {
       }
     }
 
-    // جلب البيانات بالتوازي مع الفلترة
-    const [invoices, payments] = await Promise.all([
-      Invoice.find(dateFilter)
-        .sort({ date: 1 })
-        .populate("items.product", "name price unit")
-        .lean(),
-      Payment.find(dateFilter).sort({ date: 1 }).lean(),
-    ]);
+    // Fetch ledger entries
+    const ledgerEntries = await CustomerLedger.find(dateFilter)
+      .sort({ createdAt: 1 })
+      .lean();
+
+    // Enrich entries with document details
+    const enrichedEntries = await Promise.all(
+      ledgerEntries.map(async (entry) => {
+        if (entry.type === "invoice") {
+          const inv = await Invoice.findById(entry.refId).select("code").lean();
+          return { ...entry, details: inv };
+        }
+        if (entry.type === "payment") {
+          const pay = await Payment.findById(entry.refId)
+            .select("code method checkDetails")
+            .lean();
+          return { ...entry, details: pay };
+        }
+        return entry;
+      }),
+    );
 
     res.json({
       customer,
-      invoices,
-      payments,
+      ledgerEntries: enrichedEntries,
     });
   } catch (error) {
     console.error("Statement Error:", error);

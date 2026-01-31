@@ -1,7 +1,9 @@
-import React from "react";
 import SearchBox from "./SearchBox";
+import DeleteButton from "./DeleteButton";
+import { deletePayment } from "../API/PaymentAPI";
+import toast from "react-hot-toast";
 
-const PaymentsTable = ({ payments, setSearch }) => {
+const PaymentsTable = ({ payments, setPayments, setSearch }) => {
   return (
     <div className="max-w-7xl mx-auto bg-white rounded-4xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
       <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
@@ -19,23 +21,28 @@ const PaymentsTable = ({ payments, setSearch }) => {
         <table className="w-full text-right">
           <thead>
             <tr className="text-gray-400 text-sm uppercase tracking-wider">
-              <th className="py-5 px-8">الجهة / البيان</th>
+              <th className="py-5 px-8 text-right">الجهة / البيان</th>
               <th className="py-5 px-8 text-center">التاريخ</th>
               <th className="py-5 px-8 text-center">الطريقة</th>
               <th className="py-5 px-8 text-center">المبلغ</th>
+              <th className="py-5 px-8 text-center">العمليات</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
             {payments.map((payment) => (
               <PaymentRow
                 key={payment._id}
-                name={payment.customer?.name}
-                desc={payment.note}
-                code={payment.code}
-                date={payment.date.split("T")[0]}
-                type={payment.method}
-                amount={payment.amount}
-                checkDetails={payment.checkDetails || "لا يوجد"}
+                payment={payment}
+                onDelete={async (id) => {
+                  try {
+                    await deletePayment(id);
+                    setPayments((prev) => prev.filter((p) => p._id !== id));
+                    toast.success("تم حذف الدفعة بنجاح");
+                  } catch (err) {
+                    console.error("Delete Error:", err);
+                    toast.error("خطأ أثناء حذف الدفعة");
+                  }
+                }}
               />
             ))}
           </tbody>
@@ -45,27 +52,55 @@ const PaymentsTable = ({ payments, setSearch }) => {
   );
 };
 
-const PaymentRow = ({ name, desc, code, date, type, amount, checkDetails }) => (
+const PaymentRow = ({ payment, onDelete }) => (
   <tr className="hover:bg-blue-50/30 transition-colors group">
     <td className="py-5 px-8">
-      <div className="font-bold text-gray-800">{name}</div>
-      <div className="text-xs text-gray-400 mt-0.5">{desc || "لا يوجد"}</div>
-      <div className="text-xs text-gray-400 mt-0.5">{code || "لا يوجد"}</div>
-    </td>
-    <td className="py-5 px-8 text-center text-gray-500 font-mono text-sm">
-      {date}
-    </td>
-    <td className="py-5 px-8 text-center">
-      <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold">
-        {type}
-      </span>
-      <div className="text-[11px] text-blue-600 mt-1 font-black">
-        شيك: {checkDetails.checkNumber} | بنك: {checkDetails.bankName} |
-        استحقاق: {checkDetails.dueDate?.split("T")[0]}
+      <div className="font-bold text-gray-800">{payment.customer?.name}</div>
+      <div className="text-xs text-gray-400 mt-0.5">
+        {payment.note || "لا يوجد بيان"}
+      </div>
+      <div className="text-xs text-blue-500 font-mono mt-0.5">
+        {payment.code}
       </div>
     </td>
-    <td className="py-5 px-8 text-center font-black text-blue-900 font-mono">
-      {amount} ₪
+    <td className="py-5 px-8 text-center text-gray-500 font-mono text-sm">
+      {payment.date?.split("T")[0]}
+    </td>
+    <td className="py-5 px-8 text-center">
+      <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold uppercase">
+        {payment.method === "cash"
+          ? "💵 نقداً"
+          : payment.method === "bank"
+            ? "🏦 بنكي"
+            : "🎫 شيك"}
+      </span>
+      {payment.method === "check" && payment.checkDetails && (
+        <div className="text-[10px] text-blue-600 mt-1 font-black">
+          {payment.checkDetails.checkNumber} | {payment.checkDetails.bankName}
+          <br />
+          استحقاق: {payment.checkDetails.dueDate?.split("T")[0]}
+          {payment.checkDetails.status === "returned" && (
+            <span className="text-red-500 block"> (راجع)</span>
+          )}
+        </div>
+      )}
+    </td>
+    <td className="py-5 px-8 text-center font-black text-blue-900 font-mono text-lg">
+      {payment.amount} ₪
+    </td>
+    <td className="py-5 px-8 text-center">
+      <DeleteButton
+        handleDelete={() => {
+          if (
+            window.confirm(
+              "هل أنت متأكد من حذف هذه الدفعة؟ سيعاد احتساب رصيد العميل.",
+            )
+          ) {
+            onDelete(payment._id);
+          }
+        }}
+        label="حذف"
+      />
     </td>
   </tr>
 );

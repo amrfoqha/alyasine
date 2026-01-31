@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getCustomerStatement } from "../API/CustomerAPI";
 import Header from "../components/Header";
-import { motion } from "framer-motion";
 import {
   DescriptionRounded,
   PaymentsRounded,
@@ -17,6 +16,7 @@ import LoadingOverlay from "../components/LoadingOverlay";
 import toast from "react-hot-toast";
 import BackButton from "../components/BackButton";
 import ButtonComponent from "../components/ButtonComponent";
+import { motion } from "framer-motion";
 
 const CustomerStatementPage = () => {
   const { id } = useParams();
@@ -43,6 +43,7 @@ const CustomerStatementPage = () => {
           filter.startDate,
           filter.endDate,
         );
+        console.log(response);
         setData(response);
       } catch (error) {
         console.error("Error fetching statement:", error);
@@ -54,52 +55,14 @@ const CustomerStatementPage = () => {
     fetchStatement();
   }, [id, filter.startDate, filter.endDate]);
 
-  // if (loading) return <LoadingOverlay />;
+  if (loading) return <LoadingOverlay />;
   if (!data) return <div className="text-center p-10">العميل غير موجود</div>;
 
-  const { customer, invoices, payments } = data;
+  const { customer, ledgerEntries } = data;
 
-  const totalInvoicesValue = invoices.reduce((sum, inv) => sum + inv.total, 0);
-  const totalPayedValue = invoices.reduce(
-    (sum, inv) => sum + inv.paidAmount,
-    0,
-  );
-  const totalPaymentsValue = payments.reduce((sum, p) => sum + p.amount, 0);
-
-  // Combine, sort by date and calculate running balance
-  const allTransactions = [
-    ...invoices.map((inv) => ({
-      ...inv,
-      type: "invoice",
-      sortDate: new Date(inv.date),
-    })),
-    ...payments.map((p) => ({
-      ...p,
-      type: "payment",
-      sortDate: new Date(p.date),
-    })),
-  ]
-    .sort((a, b) => {
-      const dateDiff = a.sortDate - b.sortDate;
-      if (dateDiff !== 0) return dateDiff;
-
-      if (a.type !== b.type) {
-        return a.type === "invoice" ? -1 : 1;
-      }
-
-      return new Date(a.createdAt) - new Date(b.createdAt);
-    }) // Sort oldest to newest for calculation
-    .reduce((acc, tx) => {
-      const prevBalance =
-        acc.length > 0 ? acc[acc.length - 1].runningBalance : 0;
-      // الرصيد الجاري = الرصيد السابق + (الإجمالي - المدفوع في الفاتورة) للفواتير
-      // أو الرصيد السابق - مبلغ الدفعة للمدفوعات
-      const amount =
-        tx.type === "invoice" ? tx.total - (tx.paidAmount || 0) : -tx.amount;
-      acc.push({ ...tx, runningBalance: prevBalance + amount });
-      return acc;
-    }, [])
-    .reverse();
+  // Ledger entries are already sorted by date from backend (oldest first)
+  // We reverse them for display (newest first)
+  const allTransactions = [...ledgerEntries].reverse();
 
   return (
     <div className="bg-[#f8fafc] min-h-screen w-full pb-10 font-sans" dir="rtl">
@@ -204,16 +167,16 @@ const CustomerStatementPage = () => {
           </Grid>
           <Grid>
             <SummaryCard
-              title="إجمالي الفواتير"
-              value={`${totalInvoicesValue} ₪`}
+              title="إجمالي الديوان (الفواتير)"
+              value={`${customer.orders} طلبية`}
               icon={<TrendingUpRounded sx={{ fontSize: 40 }} />}
               color="bg-blue-50 text-blue-600"
             />
           </Grid>
           <Grid>
             <SummaryCard
-              title="إجمالي المدفوعات"
-              value={`${totalPaymentsValue} ₪`}
+              title="معدل الائتمان"
+              value={`نشط`}
               icon={<TrendingDownRounded sx={{ fontSize: 40 }} />}
               color="bg-green-50 text-green-600"
             />
@@ -333,29 +296,29 @@ const CustomerStatementPage = () => {
           <thead>
             <tr>
               <th className="p-4 bg-slate-50 border-e-2 border-slate-800">
-                إجمالي الفواتير (+)
+                الرصيد الافتتاحي
               </th>
               <th className="p-4 bg-slate-50 border-e-2 border-slate-800">
-                القيمة المدفوعة من الفواتير (-)
+                إجمالي حركة المدين (+)
               </th>
               <th className="p-4 bg-slate-50 border-e-2 border-slate-800">
-                إجمالي المدفوعات (-)
+                إجمالي حركة الدائن (-)
               </th>
               <th className="p-4 bg-slate-900 text-white">
-                صافي الرصيد النهائي
+                الرصيد النهائي الحالي
               </th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td className="p-4 bg-slate-50 border-e-2 border-slate-800">
-                {totalInvoicesValue} ₪
+                0 ₪
               </td>
               <td className="p-4 bg-slate-50 border-e-2 border-slate-800">
-                {totalPayedValue} ₪
+                {ledgerEntries.reduce((sum, e) => sum + e.debit, 0)} ₪
               </td>
               <td className="p-4 bg-slate-50 border-e-2 border-slate-800">
-                {totalPaymentsValue} ₪
+                {ledgerEntries.reduce((sum, e) => sum + e.credit, 0)} ₪
               </td>
               <td className="p-4 bg-slate-900 text-white">
                 {customer.balance} ₪
@@ -405,97 +368,125 @@ const SummaryCard = ({ title, value, icon, color }) => (
 );
 
 const TransactionRow = ({ tx }) => {
-  const isInvoice = tx.type === "invoice";
   const date = (tx.date || tx.createdAt).split("T")[0];
   const navigate = useNavigate();
+
+  const getTypeStyle = () => {
+    switch (tx.type) {
+      case "invoice":
+        return {
+          color: "text-blue-700",
+          label: "فاتورة",
+          icon: <DescriptionRounded fontSize="small" />,
+        };
+      case "payment":
+        return {
+          color: "text-green-700",
+          label: "دفعة",
+          icon: <PaymentsRounded fontSize="small" />,
+        };
+      case "check_return":
+        return {
+          color: "text-red-700",
+          label: "شيك راجع",
+          icon: <TrendingUpRounded fontSize="small" />,
+        };
+      case "invoice_deleted":
+        return {
+          color: "text-orange-700",
+          label: "حذف فاتورة",
+          icon: <TrendingDownRounded fontSize="small" />,
+        };
+      case "payment_deleted":
+        return {
+          color: "text-orange-700",
+          label: "حذف دفعة",
+          icon: <TrendingUpRounded fontSize="small" />,
+        };
+      default:
+        return {
+          color: "text-slate-700",
+          label: tx.type,
+          icon: <DescriptionRounded fontSize="small" />,
+        };
+    }
+  };
+
+  const style = getTypeStyle();
+
+  const renderDescription = () => {
+    if (tx.description) return tx.description;
+
+    if (tx.type === "invoice") {
+      return (
+        <div className="flex flex-col">
+          <span>فاتورة مبيعات</span>
+          {tx.details?.code && (
+            <span className="text-[10px] text-blue-500">
+              #{tx.details.code}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    if (tx.type === "payment") {
+      const method =
+        tx.details?.method === "check"
+          ? "شيك"
+          : tx.details?.method === "bank"
+            ? "تحويل بنكي"
+            : "نقدي";
+      return (
+        <div className="flex flex-col">
+          <span>دفعة {method}</span>
+          {tx.details?.method === "check" && tx.details?.checkDetails && (
+            <span className="text-[10px] text-green-600 font-mono">
+              رقم: {tx.details.checkDetails.checkNumber} |{" "}
+              {tx.details.checkDetails.bankName}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    return `${style.label} رقم ${tx.refId?.slice(-6)}`;
+  };
 
   return (
     <tr className="hover:bg-slate-50/50 transition-colors border-b border-slate-100">
       <td className="py-6 px-8 font-mono text-sm text-slate-600">{date}</td>
       <td className="py-6 px-8 font-bold">
-        {isInvoice ? (
-          <span className="text-blue-700 flex items-center gap-2">
-            <DescriptionRounded fontSize="small" />
-            فاتورة
-          </span>
-        ) : (
-          <span className="text-green-700 flex items-center gap-2">
-            <PaymentsRounded fontSize="small" />
-            دفعة
-          </span>
-        )}
+        <span className={`${style.color} flex items-center gap-2`}>
+          {style.icon}
+          {style.label}
+        </span>
       </td>
       <td className="py-6 px-8 text-sm text-slate-600 font-bold">
-        <span className="flex items-center gap-2">
-          {isInvoice ? "فاتورة" : "دفعة"}
-          {` رقم ${tx.code}`}
-        </span>
-        {!isInvoice && tx.note}
-        {tx.method === "check" && tx.checkDetails && (
-          <div className="text-[11px] text-blue-600 mt-1 font-black">
-            شيك: {tx.checkDetails.checkNumber} | بنك: {tx.checkDetails.bankName}{" "}
-            | استحقاق: {tx.checkDetails.dueDate?.split("T")[0]}
-          </div>
-        )}
-        {!isInvoice && tx.method === "bank" && (
-          <div className="text-[11px] text-indigo-600 mt-1 font-black">
-            تحويل بنكي
-          </div>
-        )}
+        {renderDescription()}
       </td>
       <td
-        className={`py-6 px-8 text-center font-black text-lg ${isInvoice ? "text-red-700 bg-red-50/20" : "text-slate-300"}`}
+        className={`py-6 px-8 text-center font-black text-lg ${tx.debit > 0 ? "text-red-700 bg-red-50/20" : "text-slate-300"}`}
       >
-        {isInvoice ? `${tx.total} ₪` : "-"}
+        {tx.debit > 0 ? `${tx.debit} ₪` : "-"}
       </td>
       <td
-        className={`py-6 px-8 text-center font-black text-lg ${!isInvoice ? "text-green-800 bg-green-50/20" : "text-slate-400"}`}
+        className={`py-6 px-8 text-center font-black text-lg ${tx.credit > 0 ? "text-green-800 bg-green-50/20" : "text-slate-400"}`}
       >
-        {!isInvoice ? `${tx.amount} ₪` : `${tx.paidAmount} ₪`}
-        {isInvoice && (
-          <div className="mt-1">
-            <Chip
-              label={
-                tx.status === "paid"
-                  ? "مدفوعة"
-                  : tx.status === "partial"
-                    ? "جزئي"
-                    : "غير مدفوع"
-              }
-              color={
-                tx.status === "paid"
-                  ? "success"
-                  : tx.status === "partial"
-                    ? "warning"
-                    : "error"
-              }
-              variant="outlined"
-              size="small"
-              className="font-black text-[9px] h-5"
-            />
-          </div>
-        )}
+        {tx.credit > 0 ? `${tx.credit} ₪` : "-"}
       </td>
       <td className="py-6 px-8 text-center font-black text-lg bg-slate-50/50 border-x border-slate-100">
-        {tx.runningBalance} ₪
+        {tx.balanceAfter} ₪
       </td>
       <td className="py-6 px-8 text-center no-print">
-        <ButtonComponent
-          onClick={() => (isInvoice ? navigate(`/invoice/${tx._id}`) : null)}
-          className={`px-4! py-2! rounded-xl! text-[11px]! min-w-fit! shadow-none! border gap-1.5! ${
-            isInvoice
-              ? "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-              : "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100"
-          }`}
-          label={isInvoice ? "عرض الفاتورة" : "عرض الإيصال"}
-          icon={
-            isInvoice ? (
-              <DescriptionRounded sx={{ fontSize: 14 }} />
-            ) : (
-              <PaymentsRounded sx={{ fontSize: 14 }} />
-            )
-          }
-        />
+        {tx.type === "invoice" && (
+          <ButtonComponent
+            onClick={() => navigate(`/invoice/${tx.refId}`)}
+            className="bg-white text-slate-700 border-slate-200 hover:bg-slate-50 px-4! py-2! rounded-xl! text-[11px]! min-w-fit! shadow-none! border gap-1.5!"
+            label="عرض الفاتورة"
+            icon={<DescriptionRounded sx={{ fontSize: 14 }} />}
+          />
+        )}
       </td>
     </tr>
   );

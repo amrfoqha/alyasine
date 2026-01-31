@@ -7,10 +7,9 @@ import UsePagination from "../context/UsePagination";
 
 const PaymentsPage = () => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit] = useState(5);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [totalPayments, setTotalPayments] = useState(0);
   const [totalAmount, setTotalAmount] = useState(0);
   const [countPendingCheck, setCountPendingCheck] = useState(0);
@@ -21,11 +20,9 @@ const PaymentsPage = () => {
   useEffect(() => {
     const fetchPayments = async () => {
       const res = await getPayments(page, limit, search);
-      console.log(res);
       setPayments(res.payments);
       setPage(res.pagination.page);
       setTotalPages(res.pagination.totalPages);
-      setTotalItems(res.pagination.totalPayments);
       setTotalPayments(res.pagination.totalPayments);
       setTotalAmount(res.pagination.totalAmount);
       setCountPendingCheck(res.pagination.countPendingCheck);
@@ -94,7 +91,11 @@ const PaymentsPage = () => {
           />
         </div>
         {/* Table Section */}
-        <PaymentsTable payments={payments} setSearch={setSearch} />
+        <PaymentsTable
+          payments={payments}
+          setPayments={setPayments}
+          setSearch={setSearch}
+        />
         <AddPaymentDialog
           open={open}
           handleClose={() => setOpen(false)}

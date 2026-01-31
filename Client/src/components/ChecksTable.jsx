@@ -1,8 +1,31 @@
 import React from "react";
 import { Chip, Typography } from "@mui/material";
+import ButtonComponent from "./ButtonComponent";
+import { Money } from "@mui/icons-material";
+import { Edit2 } from "lucide-react";
 
-const ChecksTable = ({ checks = [], setChecks = () => {} }) => {
-  console.log(checks);
+const ChecksTable = ({
+  checks = [],
+  fullWidth = false,
+  setOpen = () => {},
+  setSelectedCheck = () => {},
+}) => {
+  const checkdueTime = (item) => {
+    return (
+      new Date(item.checkDetails.dueDate).getTime() <= new Date().getTime()
+    );
+  };
+  const checkStatus = (item) => {
+    if (item.checkDetails.status === "pending") {
+      return "قيد الانتظار";
+    } else if (item.checkDetails.status === "cleared") {
+      return "مدفوع";
+    } else if (item.checkDetails.status === "returned") {
+      return "مرتجع";
+    } else {
+      return "غير معروف";
+    }
+  };
   return (
     <div className="overflow-x-auto w-full min-h-[200px] max-h-[380px]">
       <table className="w-full text-right border-collapse">
@@ -21,6 +44,11 @@ const ChecksTable = ({ checks = [], setChecks = () => {} }) => {
             <th className="p-4 font-semibold text-gray-500 text-sm">
               تاريخ الصرف
             </th>
+            {fullWidth && (
+              <th className="p-4 font-semibold text-gray-500 text-sm">
+                حالة الشيك
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
@@ -28,12 +56,15 @@ const ChecksTable = ({ checks = [], setChecks = () => {} }) => {
             checks.map((item) => (
               <tr
                 key={item._id}
-                className="hover:bg-gray-50 transition-colors group"
+                className={`${checkdueTime(item) ? "bg-green-100" : ""} hover:bg-gray-50 transition-colors group`}
               >
                 <td className="p-4">
-                  <span className="font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded text-sm group-hover:text-black transition-colors">
+                  <div className="font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded-2xl text-sm group-hover:text-black transition-colors w-fit">
                     {item.checkDetails.checkNumber || "غير معروف"}
-                  </span>
+                  </div>
+                  <Typography variant="caption" color="textSecondary">
+                    بنك: {item.checkDetails.bankName || "غير معروف"}
+                  </Typography>
                 </td>
                 <td className="p-4 text-gray-600 ">
                   <Chip
@@ -62,8 +93,34 @@ const ChecksTable = ({ checks = [], setChecks = () => {} }) => {
                   />
                 </td>
                 <td className="p-4 text-gray-400 text-sm group-hover:text-black transition-colors">
-                  {item.date ? item.date.split("T")[0] : item.date}
+                  {item.checkDetails.dueDate
+                    ? item.checkDetails.dueDate.split("T")[0]
+                    : item.checkDetails.dueDate}
                 </td>
+
+                {fullWidth &&
+                  (checkdueTime(item) ? (
+                    <td className="p-4 text-gray-400 text-sm group-hover:text-black transition-colors">
+                      {item.checkDetails.status === "returned" ? (
+                        <span>{checkStatus(item)}</span>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setSelectedCheck(item);
+                            setOpen(true);
+                          }}
+                          className="flex items-center gap-1 bg-green-50 text-green-600 px-3 py-2 rounded-lg hover:bg-green-600 hover:text-white transition-all duration-200 text-sm font-semibold shadow-sm"
+                        >
+                          <Edit2 size={16} />
+                          تعديل
+                        </button>
+                      )}
+                    </td>
+                  ) : (
+                    <td className="p-4 text-red-600 text-sm group-hover:text-black transition-colors">
+                      <span>{checkStatus(item)}</span>
+                    </td>
+                  ))}
               </tr>
             ))
           ) : (

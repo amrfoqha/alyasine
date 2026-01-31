@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { LoginAPI } from "../API/AuthAPI";
 import { Auth } from "../context/Auth";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const LoginFrom = ({ setShowLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,17 +39,18 @@ const LoginFrom = ({ setShowLogin }) => {
     }
     try {
       const response = await login(name, password);
-      setName("");
-      setPassword("");
+
       setError({
         nameError: "",
         passwordError: "",
       });
       if (response.success) {
         redirect("/");
+        setName("");
+        setPassword("");
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error?.message || "فشل تسجيل الدخول");
     }
   };
   return (

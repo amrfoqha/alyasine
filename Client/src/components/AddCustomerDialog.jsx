@@ -53,7 +53,7 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
 
     try {
       const res = await createCustomer(formData);
-      setCustomers((prev) => [...prev, res.data || formData]);
+      setCustomers((prev) => [...prev, res.data]);
       setOpen(false);
       toast.success("تم تسجيل العميل بنجاح");
     } catch (err) {
@@ -78,6 +78,7 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
       PaperProps={{
         sx: { borderRadius: "2.5rem", overflow: "hidden" },
       }}
+      dir="rtl"
     >
       {/* رأس النافذة المتطور */}
       <Box
@@ -88,7 +89,7 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
           position: "relative",
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={2}>
+        <Stack direction="row" alignItems="center" gap={2}>
           <Box
             sx={{
               bgcolor: "rgba(255,255,255,0.1)",
@@ -117,7 +118,7 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
 
       <Box component="form" onSubmit={handleSubmit} sx={{ bgcolor: "white" }}>
         <DialogContent sx={{ p: 4 }} dir="rtl">
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col items-start ">
             {/* حقل الاسم */}
             <div className="relative">
               <InputComponent
@@ -170,11 +171,6 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
 
         <DialogActions sx={{ p: 4, gap: 2, bgcolor: "#fcfcfc" }}>
           <ButtonComponent
-            onClick={() => setOpen(false)}
-            label="تجاهل"
-            className="!bg-slate-100 !text-slate-500 shadow-none hover:!bg-slate-200"
-          />
-          <ButtonComponent
             type="submit"
             label="حفظ البيانات"
             disabled={
@@ -182,7 +178,12 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
               !formData.name ||
               !formData.phone
             }
-            className="flex-1"
+            className="flex-1 py-4 bg-blue-600 shadow-xl shadow-blue-200 h-full"
+          />
+          <ButtonComponent
+            onClick={() => setOpen(false)}
+            label="تجاهل"
+            className="bg-slate-100 h-full text-slate-500 shadow-none hover:bg-slate-200 py-4"
           />
         </DialogActions>
       </Box>

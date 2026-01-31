@@ -7,6 +7,7 @@ import {
   refreshAccessToken,
 } from "../API/AuthAPI.jsx";
 import BaseAPI from "../API/BaseAPI";
+import toast from "react-hot-toast";
 
 const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -35,7 +36,7 @@ const UserProvider = ({ children }) => {
       saveAuthData(response.user, response.accessToken, response.refreshToken);
       return { success: true };
     } catch (error) {
-      console.log(error);
+      toast.error(error.message || "فشل تسجيل الدخول");
       return {
         success: false,
         message: error.message || "فشل تسجيل الدخول",
@@ -49,8 +50,8 @@ const UserProvider = ({ children }) => {
       saveAuthData(user, accessToken, refreshToken);
       return { success: true };
     } catch (error) {
-      console.error("Register Error:", error);
-      return { success: false, message: error.message || "فشل إنشاء الحساب" };
+      toast.error(error.message || "فشل إنشاء الحساب");
+      return { success: false, message: error?.message || "فشل إنشاء الحساب" };
     }
   };
 
@@ -58,7 +59,7 @@ const UserProvider = ({ children }) => {
     try {
       await LogoutAPI(user);
     } catch (error) {
-      console.log("Logout error:", error);
+      toast.error(error.message || "فشل تسجيل الخروج");
     } finally {
       setUser(null);
       setToken(null);
