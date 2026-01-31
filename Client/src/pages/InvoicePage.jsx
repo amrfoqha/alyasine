@@ -11,7 +11,7 @@ import { Typography, Box } from "@mui/material";
 import ButtonComponent from "../components/ButtonComponent";
 import AddInvoiceDialog from "../components/AddInvoiceDialog";
 import InvoiceTable from "../components/InvoiceTable";
-import UsePagination from "../context/usePagination";
+import UsePagination from "../context/UsePagination";
 import { getInvoices } from "../API/InvoiceAPI";
 import SearchBox from "../components/SearchBox";
 import { getAllCustomers } from "../API/CustomerAPI";
