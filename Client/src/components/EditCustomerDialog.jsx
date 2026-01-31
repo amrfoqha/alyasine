@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Box,
   Typography,
+  Fade,
+  Stack,
 } from "@mui/material";
-import InventoryIcon from "@mui/icons-material/Inventory";
 import { toast } from "react-hot-toast";
+import EditNoteRoundedIcon from "@mui/icons-material/EditNoteRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 // Components & API
 import InputComponent from "./InputComponent";
@@ -22,149 +24,169 @@ const EditCustomerDialog = ({
   customer,
   setCustomers,
 }) => {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-
-  const [errors, setErrors] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     phone: "",
     address: "",
   });
+  const [errors, setErrors] = useState({ name: "", phone: "", address: "" });
 
-  // Sync state when dialog opens or customer changes
+  // مزامنة الحالة عند فتح النافذة
   useEffect(() => {
     if (open && customer) {
-      setName(customer.name || "");
-      setPhone(customer.phone || "");
-      setAddress(customer.address || "");
+      setFormData({
+        name: customer.name || "",
+        phone: customer.phone || "",
+        address: customer.address || "",
+      });
       setErrors({ name: "", phone: "", address: "" });
     }
   }, [open, customer]);
 
-  const validate = (fieldName, value) => {
+  const validate = (field, value) => {
     let error = "";
     if (value.trim().length < 3) {
-      error = "هذا الحقل يجب أن يكون 3 أحرف على الأقل";
+      error = "هذا الحقل يتطلب 3 أحرف على الأقل";
     }
-    setErrors((prev) => ({ ...prev, [fieldName]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validate(name, value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Final check before submission
     if (
-      Object.values(errors).some((err) => err !== "") ||
-      !name ||
-      !phone ||
-      !address
+      Object.values(errors).some(Boolean) ||
+      !formData.name ||
+      !formData.phone
     ) {
       return;
     }
 
     try {
       const response = await updateCustomer(customer._id, {
-        name: name.trim(),
-        phone: phone.trim(),
-        address: address.trim(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
       });
-
-      console.log(response);
 
       setCustomer(response);
 
-      // Update the customer in the main list
+      // تحديث القائمة الرئيسية
       setCustomers((prev) =>
         prev.map((cust) => (cust._id === response._id ? response : cust)),
       );
 
       setOpen(false);
-      toast.success("تم تعديل العميل بنجاح");
+      toast.success("تم تحديث بيانات العميل");
     } catch (err) {
-      toast.error(err.response?.data?.message || "حدث خطأ أثناء تعديل العميل");
+      toast.error(err.response?.data?.message || "فشل التحديث");
     }
   };
 
   const isFormInvalid =
-    errors.name ||
-    errors.phone ||
-    errors.address ||
-    !name.trim() ||
-    !phone.trim() ||
-    !address.trim();
+    Object.values(errors).some(Boolean) ||
+    !formData.name.trim() ||
+    !formData.phone.trim();
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
-      <DialogTitle
-        component="div"
+    <Dialog
+      open={open}
+      onClose={() => setOpen(false)}
+      TransitionComponent={Fade}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: { borderRadius: "2.5rem", overflow: "hidden" },
+      }}
+      dir="rtl"
+    >
+      {/* Header بتصميم مميز للتعديل */}
+      <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          bgcolor: "#f8faff",
-          py: 2.5,
+          background: "linear-gradient(135deg, #4338ca 0%, #312e81 100%)",
+          p: 4,
+          color: "white",
+          position: "relative",
         }}
       >
-        <InventoryIcon color="primary" />
-        <Typography variant="h6" fontWeight="bold" color="text.primary">
-          تعديل بيانات العميل
-        </Typography>
-      </DialogTitle>
-
-      <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent dividers dir="rtl">
-          <div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
-            dir="rtl"
+        <Stack direction="row" alignItems="center" className="gap-4">
+          <Box
+            sx={{
+              bgcolor: "rgba(255,255,255,0.15)",
+              p: 1.5,
+              borderRadius: "1.2rem",
+            }}
           >
-            {/* Name Input */}
-            <div className="flex flex-col gap-1">
+            <EditNoteRoundedIcon sx={{ fontSize: 32 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" fontWeight="900" sx={{ lineHeight: 1.2 }}>
+              تعديل بيانات العميل
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.8 }}>
+              تعديل معلومات {customer?.name || "العميل"} بدقة
+            </Typography>
+          </Box>
+        </Stack>
+        <button
+          onClick={() => setOpen(false)}
+          className="absolute top-6 left-6 text-white/50 hover:text-white transition-colors"
+        >
+          <CloseRoundedIcon />
+        </button>
+      </Box>
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ bgcolor: "white" }}
+        dir="rtl"
+      >
+        <DialogContent sx={{ p: 4 }} className="flex flex-col items-start">
+          <div className="space-y-7">
+            <div className="relative">
               <InputComponent
-                label="اسم العميل"
-                type="text"
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  validate("name", e.target.value);
-                }}
+                label="الاسم المحدث"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
               />
               {errors.name && (
-                <span className="text-red-500 text-xs mt-1">{errors.name}</span>
+                <span className="text-[10px] text-red-500 font-black absolute -bottom-5 right-2 tracking-tight">
+                  {errors.name}
+                </span>
               )}
             </div>
 
-            {/* Phone Input */}
-            <div className="flex flex-col gap-1">
+            <div className="relative pt-2">
               <InputComponent
-                label="رقم الهاتف"
-                type="text"
-                value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value.trim());
-                  validate("phone", e.target.value);
-                }}
+                label="رقم الهاتف الجديد"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
               />
               {errors.phone && (
-                <span className="text-red-500 text-xs mt-1">
+                <span className="text-[10px] text-red-500 font-black absolute -bottom-5 right-2 tracking-tight">
                   {errors.phone}
                 </span>
               )}
             </div>
 
-            {/* Address Input */}
-            <div className="flex flex-col gap-1">
+            <div className="relative pt-2">
               <InputComponent
-                label="العنوان"
-                type="text"
-                value={address}
-                onChange={(e) => {
-                  setAddress(e.target.value);
-                  validate("address", e.target.value);
-                }}
+                label="تحديث العنوان"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
               />
               {errors.address && (
-                <span className="text-red-500 text-xs mt-1">
+                <span className="text-[10px] text-red-500 font-black absolute -bottom-5 right-2 tracking-tight">
                   {errors.address}
                 </span>
               )}
@@ -172,20 +194,17 @@ const EditCustomerDialog = ({
           </div>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+        <DialogActions sx={{ p: 4, gap: 2, bgcolor: "#fcfcfc" }}>
           <ButtonComponent
-            variant="outlined"
             onClick={() => setOpen(false)}
-            // Note: If ButtonComponent handles its own colors, ensure this class doesn't conflict
-            className="border-gray-300 text-gray-700"
-            label="إلغاء"
+            label="إلغاء التعديل"
+            className="bg-slate-100 text-slate-500 shadow-none hover:bg-slate-200"
           />
           <ButtonComponent
-            variant="contained"
             type="submit"
-            label="حفظ التعديلات"
-            color="primary"
+            label="حفظ التغييرات"
             disabled={isFormInvalid}
+            className="flex-1 !bg-indigo-600 hover:!bg-indigo-700"
           />
         </DialogActions>
       </Box>

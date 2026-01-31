@@ -9,11 +9,12 @@ const InputComponent = ({
   disabled,
   className,
   placeholder,
+  minWidth,
 }) => {
   return (
-    <div className="flex items-center justify-end gap-2" dir="rtl">
+    <div className={`flex items-center justify-end gap-2 w-full ${minWidth}`} dir="rtl">
       <label
-        className="text-xl font-bold text-gray-900"
+        className="text-lg font-bold text-gray-900 w-auto"
         htmlFor={name}
         dir="rtl"
       >

@@ -15,6 +15,11 @@ import { Auth } from "./context/Auth";
 import { useContext } from "react";
 import LoadingOverlay from "./components/LoadingOverlay";
 import InvoicePage from "./pages/InvoicePage";
+import InvoiceDetails from "./pages/InvoiceDetails";
+import InvoiceRoutes from "./Routes/InvoiceRoutes";
+import PaymentsPage from "./pages/PaymentsPage";
+import CustomerStatementPage from "./pages/CustomerStatementPage";
+import ChecksPage from "./pages/ChecksPage";
 function App() {
   const { loading } = useContext(Auth);
   if (loading) {
@@ -39,9 +44,16 @@ function App() {
           <Route path="product/:id" element={<ProductsPage />} />
           <Route path="stockin" element={<StockInPage />} />
           <Route path="customer" element={<CustomerPage />} />
-          <Route path="invoice" element={<InvoicePage />} />
-          {/* <Route path="profile" element={<ProfilePage />} />
-          <Route path="settings" element={<SettingsPage />} /> */}
+          <Route
+            path="customer/:id/statement"
+            element={<CustomerStatementPage />}
+          />
+          <Route path="invoice" element={<InvoiceRoutes />}>
+            <Route index element={<InvoicePage />} />
+            <Route path=":id" element={<InvoiceDetails />} />
+          </Route>
+          <Route path="payments" element={<PaymentsPage />} />
+          <Route path="checks" element={<ChecksPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

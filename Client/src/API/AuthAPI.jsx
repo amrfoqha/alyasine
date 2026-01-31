@@ -1,4 +1,3 @@
-import { Axios } from "axios";
 import BaseAPI from "./BaseAPI";
 
 export const LoginAPI = async (name, password) => {
@@ -47,20 +46,3 @@ export const refreshAccessToken = async (refreshToken) => {
     throw error.response?.data;
   }
 };
-
-// export const refreshAccessToken = async (refreshToken) => {
-//   console.log("إرسال طلب التجديد الآن...");
-//   try {
-//     const response = await Axios.post(
-//       "http://localhost:8000/api/auth/refresh",
-//       {
-//         refreshToken: refreshToken,
-//       },
-//     );
-//     console.log("وصل الرد من السيرفر!");
-//     return response.data;
-//   } catch (error) {
-//     console.error("فشل الطلب تماماً:", error);
-//     throw error;
-//   }
-// };

@@ -35,23 +35,25 @@ const ProductsTable = ({ products, setProducts }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       // أضفنا خلفية بيضاء، ظل خفيف، وزوايا مستديرة للحاوية
-      className="mx-auto mt-10 w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-100"
+      className="mx-auto mt-10 w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-auto"
     >
       <AddStockDialog
         open={openAddStockDialog}
         setOpen={setOpenAddStockDialog}
         onAdd={() => setOpenAddStockDialog(false)}
         product={product}
+        setProducts={setProducts}
       />
       <table className="w-full text-center" dir="rtl">
         <thead className="bg-gray-50 border-b border-gray-100">
           <tr>
             <th className="p-4 text-gray-600 font-bold">اسم المنتج</th>
             <th className="p-4 text-gray-600 font-bold">السعر</th>
-            <th className="p-4 text-gray-600 font-bold">الوحدة</th>
             <th className="p-4 text-gray-600 font-bold">الوصف</th>
             <th className="p-4 text-gray-600 font-bold">الخصائص</th>
             <th className="p-4 text-gray-600 font-bold">التصنيف</th>
+            <th className="p-4 text-gray-600 font-bold">الكمية الحالية</th>
+            <th className="p-4 text-gray-600 font-bold">الوحدة</th>
             <th className="p-4 text-gray-600 font-bold text-center">
               الإجراءات
             </th>
@@ -63,21 +65,23 @@ const ProductsTable = ({ products, setProducts }) => {
               key={product._id}
               className="hover:bg-blue-50/30 transition-colors duration-200"
             >
-              <td className="p-4 font-medium text-gray-800">{product.name}</td>
-              <td className="p-4 text-blue-600 font-bold">
+              <td className="p-4 font-medium text-gray-800 w-auto">
+                {product.name}
+              </td>
+              <td className="p-4 text-blue-600 font-bold w-auto">
                 {product.sellPrice} $
               </td>
-              <td className="p-4 text-gray-500">{product.unit}</td>
-              <td className="p-4 text-gray-500 max-w-xs truncate">
+
+              <td className="p-4 text-gray-500 max-w-xs truncate w-auto">
                 {product.description}
               </td>
-              <td className="p-2 ">
+              <td className="p-2 flex flex-col gap-2 w-auto">
                 {Object.entries(product.attributes).length > 0 ? (
                   Object.entries(product.attributes).map(
                     ([key, value], index) => (
                       <span
                         key={index}
-                        className="inline-block bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full ml-1 mb-1 w-1/3"
+                        className="inline-block bg-gray-100 text-gray-600 text-xs px-1 py-1 rounded-2xl ml-1 mb-1  w-full"
                       >
                         {key}: {value}
                       </span>
@@ -87,12 +91,18 @@ const ProductsTable = ({ products, setProducts }) => {
                   <span className="text-gray-300">لا يوجد</span>
                 )}
               </td>
-              <td className="p-4">
+              <td className="p-4 w-auto">
                 <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-lg text-sm">
                   {product.category?.name}
                 </span>
               </td>
-              <td className="p-4">
+              <td className="p-4 w-auto">
+                <span className="bg-purple-50 text-purple-600 px-3 py-1 rounded-lg text-sm">
+                  {product.quantity}
+                </span>
+              </td>
+              <td className="p-4 text-gray-500 w-auto">{product.unit}</td>
+              <td className="p-4 w-auto">
                 <div className="flex justify-center gap-3">
                   <button
                     onClick={() => handleOpenAddStockDialog(product)}

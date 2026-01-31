@@ -4,10 +4,10 @@ import ButtonComponent from "./ButtonComponent";
 import { TextField, InputAdornment } from "@mui/material";
 import { SearchIcon } from "lucide-react";
 
-const SearchBox = ({ onChange }) => {
+const SearchBox = ({ onChange, placeholder }) => {
   return (
     <TextField
-      placeholder="ابحث باسم المنتج..."
+      placeholder={`${placeholder || "ابحث باسم المنتج..."}`}
       variant="outlined"
       size="small"
       fullWidth

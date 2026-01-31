@@ -20,7 +20,8 @@ const RegFrom = ({ setShowLogin }) => {
     setName(e.target.value);
     setError({
       ...error,
-      nameError: e.target.value.length < 1 ? "الاسم يجب ان يحتوي على حرف" : "",
+      nameError:
+        e.target.value.length < 3 ? "الاسم يجب ان يكون 3 حروف على الاقل" : "",
     });
   };
   const handlePasswordChange = (e) => {
@@ -28,7 +29,9 @@ const RegFrom = ({ setShowLogin }) => {
     setError({
       ...error,
       passwordError:
-        e.target.value.length < 1 ? "الباسورد يجب ان يحتوي على حرف" : "",
+        e.target.value.length < 3
+          ? "الباسورد يجب ان يكون 3 حروف على الاقل"
+          : "",
     });
   };
   const handleConfirmPasswordChange = (e) => {
@@ -36,11 +39,11 @@ const RegFrom = ({ setShowLogin }) => {
     setError({
       ...error,
       confirmPasswordError:
-        e.target.value.length < 1
-          ? "الباسورد يجب ان يحتوي على حرف"
+        e.target.value.length < 3
+          ? "الباسورد يجب ان يكون 3 حروف على الاقل"
           : password !== e.target.value
-          ? "الباسورد غير مطابق"
-          : "",
+            ? "الباسورد غير مطابق"
+            : "",
     });
   };
   const handleSubmit = async (e) => {
@@ -77,7 +80,7 @@ const RegFrom = ({ setShowLogin }) => {
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 p-12 pb-4 border border-gray-300 rounded  md:w-1/3 w-full"
     >
-      <h1 className="md:text-3xl text-center text-lg ">تسجيل الدخول</h1>
+      <h1 className="md:text-3xl text-center text-lg ">تسجيل حساب جديد</h1>
       <div>
         <div className="flex flex-col gap-2">
           <label htmlFor="" className="text-lg md:text-xl text-end">
@@ -130,7 +133,7 @@ const RegFrom = ({ setShowLogin }) => {
         )}
       </div>
       <button className="bg-blue-500 text-white p-1 text-lg md:p-4  md:text-xl rounded md:w-full   w-full self-center hover:bg-blue-600 hover:cursor-pointer">
-        تسجيل الدخول
+        إنشاء حساب
       </button>
       <div className="flex justify-center">
         <button

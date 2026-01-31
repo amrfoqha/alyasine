@@ -1,173 +1,189 @@
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   Box,
+  Typography,
+  Fade,
+  Stack,
 } from "@mui/material";
-import { useEffect, useState } from "react";
 import InputComponent from "./InputComponent";
 import ButtonComponent from "./ButtonComponent";
 import { createCustomer } from "../API/CustomerAPI";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import Typography from "@mui/material/Typography";
+import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { toast } from "react-hot-toast";
 
 const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-
-  const [errors, setErrors] = useState({
+  const [formData, setFormData] = useState({
     name: "",
     phone: "",
     address: "",
   });
+  const [errors, setErrors] = useState({ name: "", phone: "", address: "" });
 
-  const validateName = (value) => {
-    setErrors((prev) => ({
-      ...prev,
-      name: value.length < 3 ? "اسم العميل يجب أن يكون 3 أحرف على الأقل" : "",
-    }));
+  // منطق التحقق الموحد
+  const validate = (field, value) => {
+    let error = "";
+    if (value.trim().length < 3) {
+      if (field === "name") error = "الاسم قصير جداً";
+      if (field === "phone") error = "رقم الهاتف غير مكتمل";
+      if (field === "address") error = "العنوان غير دقيق";
+    }
+    setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
-  const validatePhone = (value) => {
-    setErrors((prev) => ({
-      ...prev,
-      phone: value.length < 3 ? "رقم الهاتف يجب أن يكون 3 أحرف على الأقل" : "",
-    }));
-  };
-
-  const validateAddress = (value) => {
-    setErrors((prev) => ({
-      ...prev,
-      address: value.length < 3 ? "العنوان يجب أن يكون 3 أحرف على الأقل" : "",
-    }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validate(name, value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (Object.values(errors).some(Boolean)) return;
+    if (
+      Object.values(errors).some(Boolean) ||
+      !formData.name ||
+      !formData.phone
+    ) {
+      toast.error("يرجى ملء البيانات بشكل صحيح");
+      return;
+    }
 
     try {
-      const customer = {
-        name,
-        phone,
-        address,
-      };
-
-      const res = await createCustomer(customer);
-      setCustomers((prev) => [...prev, res.customers]);
+      const res = await createCustomer(formData);
+      setCustomers((prev) => [...prev, res.data]);
       setOpen(false);
-      toast.success("تم إضافة العميل بنجاح");
+      toast.success("تم تسجيل العميل بنجاح");
     } catch (err) {
-      toast.error("حدث خطأ أثناء إضافة العميل");
-      toast.error(err.message);
+      toast.error(err.response?.data?.message || "حدث خطأ في النظام");
     }
   };
 
   useEffect(() => {
-    setName("");
-    setPhone("");
-    setAddress("");
-    setErrors({
-      name: "",
-      phone: "",
-      address: "",
-    });
+    if (open) {
+      setFormData({ name: "", phone: "", address: "" });
+      setErrors({ name: "", phone: "", address: "" });
+    }
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="md">
-      <DialogTitle
-        component="div"
+    <Dialog
+      open={open}
+      onClose={() => setOpen(false)}
+      TransitionComponent={Fade}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: { borderRadius: "2.5rem", overflow: "hidden" },
+      }}
+      dir="rtl"
+    >
+      {/* رأس النافذة المتطور */}
+      <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-          bgcolor: "#f8faff",
-          py: 2.5,
+          background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)",
+          p: 4,
+          color: "white",
+          position: "relative",
         }}
       >
-        <InventoryIcon color="primary" />
-        <Typography variant="h6" fontWeight="bold" color="text.primary">
-          إضافة عميل جديد
-        </Typography>
-      </DialogTitle>
+        <Stack direction="row" alignItems="center" gap={2}>
+          <Box
+            sx={{
+              bgcolor: "rgba(255,255,255,0.1)",
+              p: 1.5,
+              borderRadius: "1rem",
+            }}
+          >
+            <PersonAddAlt1RoundedIcon sx={{ fontSize: 32 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" fontWeight="900" sx={{ lineHeight: 1.2 }}>
+              تسجيل عميل جديد
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.7 }}>
+              إضافة بيانات العميل لتمكينه من إجراء عمليات الشراء
+            </Typography>
+          </Box>
+        </Stack>
+        <button
+          onClick={() => setOpen(false)}
+          className="absolute top-6 left-6 text-white/50 hover:text-white transition-colors"
+        >
+          <CloseRoundedIcon />
+        </button>
+      </Box>
 
-      <Box component="form" onSubmit={handleSubmit}>
-        <DialogContent dividers dir="rtl">
-          <div className="grid grid-cols-3 gap-8 w-full " dir="rtl">
-            <div className="grid grid-rows-2 gap-2 justify-items-end">
+      <Box component="form" onSubmit={handleSubmit} sx={{ bgcolor: "white" }}>
+        <DialogContent sx={{ p: 4 }} dir="rtl">
+          <div className="space-y-6 flex flex-col items-start ">
+            {/* حقل الاسم */}
+            <div className="relative">
               <InputComponent
-                label="اسم العميل"
-                type="text"
-                name={"name"}
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  validateName(e.target.value);
-                }}
+                label="الاسم الكامل للعميل"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className={errors.name ? "border-red-300" : ""}
               />
               {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name}</p>
+                <span className="text-[10px] text-red-500 font-bold absolute -bottom-5 right-2">
+                  {errors.name}
+                </span>
               )}
             </div>
-            <div className="grid grid-rows-2 gap-2 justify-items-end">
+
+            {/* حقل الهاتف */}
+            <div className="relative pt-2">
               <InputComponent
-                label="رقم الهاتف"
-                type="text"
-                name={"phone"}
-                value={phone}
-                onChange={(e) => {
-                  setPhone(e.target.value);
-                  validatePhone(e.target.value);
-                }}
+                label="رقم التواصل (واتساب/جوال)"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className={errors.phone ? "border-red-300" : ""}
               />
               {errors.phone && (
-                <p className="text-red-500 text-sm">{errors.phone}</p>
+                <span className="text-[10px] text-red-500 font-bold absolute -bottom-5 right-2">
+                  {errors.phone}
+                </span>
               )}
             </div>
-            <div className="grid grid-rows-2 gap-2 justify-items-end">
+
+            {/* حقل العنوان */}
+            <div className="relative pt-2">
               <InputComponent
-                label="العنوان"
-                type="text"
-                name={"address"}
-                value={address}
-                onChange={(e) => {
-                  setAddress(e.target.value);
-                  validateAddress(e.target.value);
-                }}
+                label="منطقة السكن / العنوان بالتفصيل"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                className={errors.address ? "border-red-300" : ""}
               />
               {errors.address && (
-                <p className="text-red-500 text-sm">{errors.address}</p>
+                <span className="text-[10px] text-red-500 font-bold absolute -bottom-5 right-2">
+                  {errors.address}
+                </span>
               )}
             </div>
           </div>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, pb: 2 }}>
+        <DialogActions sx={{ p: 4, gap: 2, bgcolor: "#fcfcfc" }}>
           <ButtonComponent
-            variant="outlined"
-            onClick={() => setOpen(false)}
-            className={"bg-red-500 hover:bg-red-600"}
-            label="إلغاء"
-            type="button"
+            type="submit"
+            label="حفظ البيانات"
+            disabled={
+              Object.values(errors).some(Boolean) ||
+              !formData.name ||
+              !formData.phone
+            }
+            className="flex-1 py-4 bg-blue-600 shadow-xl shadow-blue-200 h-full"
           />
           <ButtonComponent
-            variant="contained"
-            type="submit"
-            label="إضافة"
-            color="primary"
-            disabled={
-              errors.name ||
-              errors.phone ||
-              errors.address ||
-              !name ||
-              !phone ||
-              !address
-            }
+            onClick={() => setOpen(false)}
+            label="تجاهل"
+            className="bg-slate-100 h-full text-slate-500 shadow-none hover:bg-slate-200 py-4"
           />
         </DialogActions>
       </Box>

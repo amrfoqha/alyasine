@@ -1,6 +1,6 @@
 const Product = require("../models/products.model");
 const ProductCategory = require("../models/productCategories.model");
-
+const { generateCode } = require("../utils/generateCode");
 module.exports.createProduct = async (req, res) => {
   try {
     const {
@@ -12,6 +12,7 @@ module.exports.createProduct = async (req, res) => {
       description,
       attributes,
     } = req.body;
+    console.log(req.body);
     const existing = await Product.findOne({ name, category });
     if (existing) {
       return res.status(400).json({
@@ -19,8 +20,9 @@ module.exports.createProduct = async (req, res) => {
           "Product with this name already exists in this category\n هذا المنتج موجود بالفعل في هذه الفئة",
       });
     }
-
+    const productCode = await generateCode("product", "PRO");
     const product = await Product.create({
+      code: productCode,
       name,
       category,
       sellPrice,
@@ -109,5 +111,17 @@ module.exports.getAllProductsByCategoryByPage = async (req, res) => {
   } catch (error) {
     console.error("Get All Products Error:", error);
     res.status(500).json({ message: "Server error while fetching products" });
+  }
+};
+
+module.exports.getAllProductsNames = async (req, res) => {
+  try {
+    const products = await Product.find(
+      { isDeleted: false },
+      { name: 1 },
+    ).lean();
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

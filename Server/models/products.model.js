@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema(
   {
+    code: {
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -41,5 +45,6 @@ const productSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
+productSchema.index({ category: 1 });
 const productModel = mongoose.model("Product", productSchema);
 module.exports = productModel;

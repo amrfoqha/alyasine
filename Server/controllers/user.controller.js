@@ -10,3 +10,12 @@ module.exports.findUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+module.exports.findAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("name");
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
