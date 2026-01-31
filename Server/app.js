@@ -23,8 +23,6 @@ const app = express();
 
 const whitelist = [
   process.env.CLIENT_URL,
-  "http://localhost:5173",
-  "http://localhost:3000",
   "https://alyasine-frontend.onrender.com",
 ];
 const corsOptions = {
