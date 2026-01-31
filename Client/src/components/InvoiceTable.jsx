@@ -24,7 +24,7 @@ const InvoiceTable = ({ invoices, setInvoices }) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="mx-auto  w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-120"
+      className="mx-auto  w-full overflow-x-auto rounded-xl bg-white shadow-lg border border-gray-100  h-120"
     >
       <table className="w-full text-center" dir="rtl">
         <thead className="bg-gray-50 border-b border-gray-100">
