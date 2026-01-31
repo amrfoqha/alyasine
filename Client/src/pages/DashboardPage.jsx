@@ -148,7 +148,7 @@ const DashboardPage = () => {
     <div className="bg-[#f8fafc] min-h-screen w-full pb-10" dir="rtl">
       <Header title="مركز القيادة" />
 
-      <main className="p-4 md:p-8 max-w-8xl mx-auto mt-[-30px]">
+      <main className="p-4 md:p-8 max-w-8xl mx-auto mt-4 md:mt-[-30px]">
         <motion.div
           variants={containerVariants}
           initial="hidden"

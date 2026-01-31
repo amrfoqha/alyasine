@@ -35,7 +35,7 @@ const ProductsTable = ({ products, setProducts }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       // أضفنا خلفية بيضاء، ظل خفيف، وزوايا مستديرة للحاوية
-      className="mx-auto mt-10 w-full overflow-hidden rounded-xl bg-white shadow-lg border border-gray-100  h-auto"
+      className="mx-auto mt-10 w-full overflow-x-auto rounded-xl bg-white shadow-lg border border-gray-100  h-auto"
     >
       <AddStockDialog
         open={openAddStockDialog}

@@ -22,7 +22,7 @@ const CustomerTable = ({ customers, setCustomers }) => {
   };
   return (
     <div
-      className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 w-full"
+      className="bg-white rounded-xl shadow-md overflow-x-auto border border-gray-100 w-full"
       dir="rtl"
     >
       <EditCustomerDialog
