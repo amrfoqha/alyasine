@@ -4,7 +4,7 @@ import { Auth } from "../context/Auth";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const LoginFrom = ({ setShowLogin }) => {
+const LoginFrom = ({ setShowLogin = () => {} }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
