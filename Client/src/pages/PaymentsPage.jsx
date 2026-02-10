@@ -14,6 +14,7 @@ const PaymentsPage = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const [countPendingCheck, setCountPendingCheck] = useState(0);
   const [totalCheckPendingAmount, setTotalCheckPendingAmount] = useState(0);
+  const [totalDept, setTotalDept] = useState(0);
   const [open, setOpen] = useState(false);
   const [payments, setPayments] = useState([]);
 
@@ -27,6 +28,7 @@ const PaymentsPage = () => {
       setTotalAmount(res.pagination.totalAmount);
       setCountPendingCheck(res.pagination.countPendingCheck);
       setTotalCheckPendingAmount(res.pagination.totalCheckPendingAmount);
+      setTotalDept(res.totalDept);
     };
     fetchPayments();
   }, [page, limit, search]);
@@ -77,14 +79,14 @@ const PaymentsPage = () => {
           />
           <StatCard
             title="متوسط الدفعة"
-            amount={(totalAmount / totalPayments).toFixed(2)}
+            amount={(totalAmount / totalPayments).toFixed(2) || "0"}
             color="bg-blue-600"
             icon="📊"
             trend="معدل مستقر"
           />
           <StatCard
             title="إجمالي المطالبات"
-            amount="20,000"
+            amount={totalDept}
             color="bg-gray-900"
             icon="📈"
             trend="نسبة التحصيل 62%"

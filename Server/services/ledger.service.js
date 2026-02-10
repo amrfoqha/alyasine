@@ -8,6 +8,7 @@ exports.addLedgerEntry = async ({
   credit = 0,
   balanceAfter,
   description,
+  docModel,
   session,
 }) => {
   return await CustomerLedger.create(
@@ -19,6 +20,7 @@ exports.addLedgerEntry = async ({
         debit,
         credit,
         balanceAfter,
+        docModel,
         description,
       },
     ],

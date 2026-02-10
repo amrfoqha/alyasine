@@ -64,10 +64,11 @@ exports.createInvoice = async (data) => {
       customer,
       type: "invoice",
       refId: invoice[0]._id,
-      debit: remainingAmount,
-      credit: 0,
+      debit: total || 0,
+      credit: paidAmount || 0,
       balanceAfter: customerDoc.balance,
       description: "فاتورة بيع رقم " + invoiceCode,
+      docModel: "Invoice",
       session,
     });
 
@@ -107,6 +108,7 @@ exports.updateCheckStatus = async (invoiceId, newStatus) => {
         credit: 0,
         balanceAfter: customer.balance,
         description: "شيك راجع على فاتورة " + invoice.code,
+        docModel: "Invoice",
         session,
       });
     }
@@ -171,6 +173,7 @@ exports.deleteInvoice = async (invoiceId) => {
       credit: invoice.remainingAmount,
       balanceAfter: customer.balance,
       description: `حذف فاتورة رقم ${invoice.code} (عكس قيد)`,
+      docModel: "Invoice",
       session,
     });
 

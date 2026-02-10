@@ -101,7 +101,8 @@ const ChecksTable = ({
                 {fullWidth &&
                   (checkdueTime(item) ? (
                     <td className="p-4 text-gray-400 text-sm group-hover:text-black transition-colors">
-                      {item.checkDetails.status === "returned" ? (
+                      {item.checkDetails.status === "returned" ||
+                      item.checkDetails.status === "cleared" ? (
                         <span>{checkStatus(item)}</span>
                       ) : (
                         <button

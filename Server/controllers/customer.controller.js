@@ -177,11 +177,13 @@ module.exports.getCustomerStatement = async (req, res) => {
     // Enrich entries with document details
     const enrichedEntries = await Promise.all(
       ledgerEntries.map(async (entry) => {
-        if (entry.type === "invoice") {
-          const inv = await Invoice.findById(entry.refId).select("code").lean();
+        if (entry.docModel === "Invoice") {
+          const inv = await Invoice.findById(entry.refId)
+            .select("code checkDetails")
+            .lean();
           return { ...entry, details: inv };
         }
-        if (entry.type === "payment") {
+        if (entry.docModel === "Payment") {
           const pay = await Payment.findById(entry.refId)
             .select("code method checkDetails")
             .lean();

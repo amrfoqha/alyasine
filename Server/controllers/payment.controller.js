@@ -80,6 +80,22 @@ module.exports.findAllPayments = async (req, res) => {
         },
       },
     ]);
+    const totalDebit = await Payment.aggregate([
+      {
+        $match: {
+          method: "check",
+          "checkDetails.status": "returned",
+          isDeleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalCount: { $sum: 1 },
+          totalDebit: { $sum: "$amount" },
+        },
+      },
+    ]);
 
     const totalPayments = result.metadata[0]?.totalCount || 0;
     const totalAmount = result.metadata[0]?.totalAmount || 0;
@@ -88,6 +104,7 @@ module.exports.findAllPayments = async (req, res) => {
 
     res.json({
       payments,
+      totalDebit: totalDebit[0]?.totalDebit || 0,
       pagination: {
         page,
         limit,

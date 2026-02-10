@@ -138,6 +138,7 @@ const CustomerPage = () => {
         open={open}
         setOpen={setOpen}
         setCustomers={setCustomers}
+        customersCount={customersCount}
       />
     </div>
   );
