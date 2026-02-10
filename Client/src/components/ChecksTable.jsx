@@ -56,7 +56,7 @@ const ChecksTable = ({
             checks.map((item) => (
               <tr
                 key={item._id}
-                className={`${checkdueTime(item) ? "bg-green-100" : ""} hover:bg-gray-50 transition-colors group`}
+                className={`${item.checkDetails.status === "returned" ? "bg-red-200" : checkdueTime(item) ? "bg-green-200" : ""} hover:bg-gray-50 transition-colors group`}
               >
                 <td className="p-4">
                   <div className="font-mono text-gray-600 bg-gray-100 px-2 py-1 rounded-2xl text-sm group-hover:text-black transition-colors w-fit">

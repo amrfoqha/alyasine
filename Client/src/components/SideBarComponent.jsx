@@ -12,6 +12,7 @@ import {
   PaymentsRounded,
   ReceiptLongRounded,
   PeopleAltRounded,
+  AccountBalanceWalletRounded,
 } from "@mui/icons-material";
 
 const NavButton = ({
@@ -139,6 +140,7 @@ const SideBarComponent = ({ mobileOpen, setMobileOpen }) => {
     { path: "/payments", label: "حساب الدفعات", icon: PaymentsRounded },
     { path: "/invoice", label: "نظام الفواتير", icon: ReceiptLongRounded },
     { path: "/customer", label: "قائمة الزبائن", icon: PeopleAltRounded },
+    { path: "/checks", label: "الشيكات", icon: AccountBalanceWalletRounded },
   ];
 
   const handleDrawerToggle = () => {
