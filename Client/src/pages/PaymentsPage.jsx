@@ -79,7 +79,11 @@ const PaymentsPage = () => {
           />
           <StatCard
             title="متوسط الدفعة"
-            amount={(totalAmount / totalPayments)?.toFixed(2) || 0}
+            amount={
+              totalPayments !== 0
+                ? (totalAmount / totalPayments)?.toFixed(2)
+                : 0
+            }
             color="bg-blue-600"
             icon="📊"
             trend="معدل مستقر"
@@ -87,7 +91,7 @@ const PaymentsPage = () => {
 
           <StatCard
             title="إجمالي المطالبات"
-            amount={totalDept}
+            amount={totalDept || 0}
             color="bg-gray-900"
             icon="📈"
             trend="نسبة التحصيل 62%"
