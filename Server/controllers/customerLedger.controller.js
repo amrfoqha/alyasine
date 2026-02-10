@@ -6,7 +6,9 @@ module.exports.getCustomerLedger = async (req, res) => {
     const ledger = await CustomerLedger.find({
       customer: customerId,
       isDeleted: false,
-    }).sort({ createdAt: -1 });
+    })
+      .populate("refId")
+      .sort({ createdAt: -1 });
     res.json(ledger);
   } catch (error) {
     res.status(500).json({ message: error.message });

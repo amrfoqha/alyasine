@@ -15,7 +15,12 @@ import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { toast } from "react-hot-toast";
 
-const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
+const AddCustomerDialog = ({
+  open,
+  setOpen,
+  setCustomers,
+  setCustomersCount,
+}) => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -53,7 +58,8 @@ const AddCustomerDialog = ({ open, setOpen, setCustomers }) => {
 
     try {
       const res = await createCustomer(formData);
-      setCustomers((prev) => [...prev, res.data]);
+      setCustomersCount((prev) => prev + 1);
+      setCustomers((prev) => [...prev, res]);
       setOpen(false);
       toast.success("تم تسجيل العميل بنجاح");
     } catch (err) {

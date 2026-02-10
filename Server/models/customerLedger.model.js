@@ -17,6 +17,13 @@ const customerLedgerSchema = new mongoose.Schema(
     refId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      refPath: "docModel",
+    },
+
+    docModel: {
+      type: String,
+      required: true,
+      enum: ["Invoice", "Payment"],
     },
 
     description: String,

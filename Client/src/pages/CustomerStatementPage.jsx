@@ -417,20 +417,22 @@ const TransactionRow = ({ tx }) => {
   const renderDescription = () => {
     if (tx.description) return tx.description;
 
-    if (tx.type === "invoice") {
+    if (tx.docModel === "Invoice") {
       return (
-        <div className="flex flex-col">
-          <span>فاتورة مبيعات</span>
-          {tx.details?.code && (
-            <span className="text-[10px] text-blue-500">
-              #{tx.details.code}
-            </span>
-          )}
+        <div className="flex flex-col w-full">
+          {tx.description && <span>{tx.description}</span>}
+          {tx.details.checkDetails.checkNumber &&
+            tx.details.checkDetails.bankName && (
+              <span className="text-[10px] text-green-600 font-mono">
+                رقم: {tx.details.checkDetails.checkNumber} |{" "}
+                {tx.details.checkDetails.bankName}
+              </span>
+            )}
         </div>
       );
     }
 
-    if (tx.type === "payment") {
+    if (tx.docModel === "Payment") {
       const method =
         tx.details?.method === "check"
           ? "شيك"
@@ -438,7 +440,8 @@ const TransactionRow = ({ tx }) => {
             ? "تحويل بنكي"
             : "نقدي";
       return (
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full">
+          {tx.description && <span>{tx.description}</span>}
           <span>دفعة {method}</span>
           {tx.details?.method === "check" && tx.details?.checkDetails && (
             <span className="text-[10px] text-green-600 font-mono">
@@ -450,7 +453,21 @@ const TransactionRow = ({ tx }) => {
       );
     }
 
-    return `${style.label} رقم ${tx.refId?.slice(-6)}`;
+    if (tx.docModel === "CheckReturn") {
+      return (
+        <div className="flex flex-col w-full">
+          {tx.description && <span>{tx.description}</span>}
+          {tx.details?.checkDetails && (
+            <span className="text-[10px] text-green-600 font-mono">
+              رقم: {tx.details.checkDetails.checkNumber} |{" "}
+              {tx.details.checkDetails.bankName}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    return `${tx.description}`;
   };
 
   return (
@@ -462,7 +479,7 @@ const TransactionRow = ({ tx }) => {
           {style.label}
         </span>
       </td>
-      <td className="py-6 px-8 text-sm text-slate-600 font-bold">
+      <td className="py-6 text-sm text-slate-600 font-bold">
         {renderDescription()}
       </td>
       <td

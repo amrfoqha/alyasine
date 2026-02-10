@@ -28,6 +28,7 @@ module.exports.createPayment = async (data) => {
       credit: data.amount,
       balanceAfter: customer.balance,
       description: "دفعة رقم " + paymentCode,
+      docModel: "Payment",
       session,
     });
 
@@ -70,6 +71,7 @@ module.exports.updateCheckStatus = async (paymentId, newStatus) => {
         credit: 0,
         balanceAfter: customer.balance,
         description: "شيك راجع دفعة " + payment.code,
+        docModel: "Payment",
         session,
       });
     } else if (
@@ -86,6 +88,7 @@ module.exports.updateCheckStatus = async (paymentId, newStatus) => {
         credit: payment.amount,
         balanceAfter: customer.balance,
         description: "تحصيل شيك سابق (راجع) رقم " + payment.code,
+        docModel: "Payment",
         session,
       });
     }
@@ -130,6 +133,7 @@ module.exports.deletePayment = async (paymentId) => {
         credit: 0,
         balanceAfter: customer.balance,
         description: `حذف دفعة رقم ${payment.code} (عكس قيد)`,
+        docModel: "Payment",
         session,
       });
     }
