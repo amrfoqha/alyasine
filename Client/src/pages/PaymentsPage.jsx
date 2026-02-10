@@ -79,11 +79,12 @@ const PaymentsPage = () => {
           />
           <StatCard
             title="متوسط الدفعة"
-            amount={(totalAmount / totalPayments).toFixed(2) || "0"}
+            amount={(totalAmount / totalPayments)?.toFixed(2) || 0}
             color="bg-blue-600"
             icon="📊"
             trend="معدل مستقر"
           />
+
           <StatCard
             title="إجمالي المطالبات"
             amount={totalDept}
