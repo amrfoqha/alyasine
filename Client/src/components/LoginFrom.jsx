@@ -59,7 +59,7 @@ const LoginFrom = ({ setShowLogin = () => {}, loading, setLoading }) => {
   };
   return (
     <>
-      <LoadingOverlay />
+      { loading && <LoadingOverlay />}
       <form
         onSubmit={handleSubmit}
         className="flex flex-col gap-4 p-12 pb-4 border border-gray-300 rounded  md:w-1/3 w-full"
