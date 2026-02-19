@@ -80,10 +80,19 @@ module.exports.findAllCustomers = async (req, res) => {
 
 module.exports.createCustomer = async (req, res) => {
   try {
-    const cust = await Customer.findOne({ name: req.body.name.toLowerCase(),isDeleted: false });
-    if (cust) {
-      return res.status(400).json({ message: "العميل موجود بالفعل" });
-    }
+    const existing = await Customer.findOne({ 
+  name: req.body.name.toLowerCase() 
+});
+
+if (existing) {
+  if (existing.isDeleted) {
+    existing.isDeleted = false;
+    await existing.save();
+    return res.json(existing);
+  } else {
+    return res.status(400).json({ message: "Customer already exists" });
+  }
+}
     const customerCode = await generateCode("customer", "CUS");
     const customer = await Customer.create({
       ...req.body,
