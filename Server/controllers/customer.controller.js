@@ -80,7 +80,7 @@ module.exports.findAllCustomers = async (req, res) => {
 
 module.exports.createCustomer = async (req, res) => {
   try {
-    const cust = await Customer.findOne({ name: req.body.name.toLowerCase() });
+    const cust = await Customer.findOne({ name: req.body.name.toLowerCase(),isDeleted: false });
     if (cust) {
       return res.status(400).json({ message: "العميل موجود بالفعل" });
     }
