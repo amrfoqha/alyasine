@@ -63,7 +63,7 @@ const AddCustomerDialog = ({
       setOpen(false);
       toast.success("تم تسجيل العميل بنجاح");
     } catch (err) {
-      toast.error(err.response?.data?.message || "حدث خطأ في النظام");
+      toast.error(err?.message || "حدث خطأ في النظام");
     }
   };
 
